@@ -97,7 +97,7 @@ const AdminOrders = () => {
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Total Amount</p>
-                  <p className="font-semibold text-green-600">${order.totalAmount.toFixed(2)}</p>
+                  <p className="font-semibold text-green-600">NPR {order.totalAmount.toFixed(2)}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Date</p>
@@ -110,7 +110,7 @@ const AdminOrders = () => {
                 <ul className="space-y-1">
                   {order.items.map((item, index) => (
                     <li key={index} className="text-sm">
-                      {item.medicine?.name || 'Unknown'} x {item.quantity} @ ${item.price} each
+                      {item.medicine?.name || 'Unknown'} x {item.quantity} @ NPR {item.price} each
                     </li>
                   ))}
                 </ul>

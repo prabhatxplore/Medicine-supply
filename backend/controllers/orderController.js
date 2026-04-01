@@ -107,10 +107,15 @@ exports.updateOrderStatus = async (req, res) => {
 exports.getAllOrders = async (req, res) => {
   // Admin function - get all orders
   try {
-    const orders = await Order.find().populate("user").populate("items.medicine");
+    const orders = await Order.find()
+      .populate("user")
+      .populate("items.medicine")
+      .populate("volunteer", "email name role");
+      
     res.json(orders);
   } catch (err) {
     console.error("getAllOrders error", err);
     res.status(500).json({ message: "Server error" });
   }
 };
+

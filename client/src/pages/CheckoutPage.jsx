@@ -1,182 +1,233 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
+
+const STEPS = ['Cart', 'Checkout', 'Confirmed'];
 
 const CheckoutPage = () => {
   const [cart, setCart] = useState([]);
   const [prescription, setPrescription] = useState(null);
   const [prescriptionFileName, setPrescriptionFileName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const storedCart = JSON.parse(localStorage.getItem('cart') || '[]');
-    setCart(storedCart);
+    setCart(JSON.parse(localStorage.getItem('cart') || '[]'));
   }, []);
 
-  const handlePrescriptionChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      // Validate file type
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
-      if (!allowedTypes.includes(file.type)) {
-        toast.error('Only JPEG, PNG, WebP images and PDF files are allowed');
-        setPrescription(null);
-        setPrescriptionFileName('');
-        return;
-      }
-      // Validate file size (5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error('File size must be less than 5MB');
-        setPrescription(null);
-        setPrescriptionFileName('');
-        return;
-      }
-      setPrescription(file);
-      setPrescriptionFileName(file.name);
-    }
+  const handlePrescriptionChange = (file) => {
+    if (!file) return;
+    const allowed = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+    if (!allowed.includes(file.type)) { toast.error('Only JPEG, PNG, WebP or PDF allowed'); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error('File must be under 5MB'); return; }
+    setPrescription(file);
+    setPrescriptionFileName(file.name);
+    toast.success('Prescription uploaded ✓');
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+    const file = e.dataTransfer.files[0];
+    handlePrescriptionChange(file);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
-    const items = cart.map(item => ({
-      medicineId: item._id,
-      quantity: item.quantity,
-    }));
-
+    const items = cart.map(i => ({ medicineId: i._id, quantity: i.quantity }));
     const formData = new FormData();
     formData.append('items', JSON.stringify(items));
-    if (prescription) {
-      formData.append('prescription', prescription);
-    }
-
+    if (prescription) formData.append('prescription', prescription);
     try {
-      const response = await fetch('http://localhost:3000/api/orders', {
-        method: 'POST',
-        credentials: 'include',
-        body: formData,
+      const res = await fetch('http://localhost:3000/api/orders', {
+        method: 'POST', credentials: 'include', body: formData,
       });
-
-      if (response.ok) {
+      if (res.ok) {
         localStorage.removeItem('cart');
-        toast.success('Order placed successfully!');
+        toast.success('Order placed successfully! 🎉');
         navigate('/orders');
       } else {
-        const error = await response.json();
-        toast.error(error.message || 'Failed to place order');
+        const err = await res.json();
+        toast.error(err.message || 'Failed to place order');
       }
-    } catch (err) {
-      toast.error('Network error');
-    } finally {
-      setLoading(false);
-    }
+    } catch { toast.error('Network error'); }
+    finally { setLoading(false); }
   };
 
-  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const requiresPrescription = cart.some(item => item.requiresPrescription);
+  const total = cart.reduce((s, i) => s + i.price * i.quantity, 0);
+  const delivery = total >= 100 ? 0 : 50;
+  const grandTotal = total + delivery;
+  const requiresPrescription = cart.some(i => i.requiresPrescription);
+  const canSubmit = !loading && cart.length > 0 && (!requiresPrescription || prescription);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-4xl font-bold text-gray-900 mb-8">Checkout</h1>
-        
-        {/* Order Summary */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Order Summary</h2>
-          {cart.length === 0 ? (
-            <p className="text-gray-600">Your cart is empty</p>
-          ) : (
-            <>
-              {cart.map((item) => (
-                <div key={item._id} className="flex justify-between items-center mb-3 border-b pb-3">
-                  <div>
-                    <p className="font-semibold text-gray-900">{item.name}</p>
-                    <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
-                    {item.requiresPrescription && (
-                      <p className="text-xs text-red-600 mt-1">⚠️ Requires Prescription</p>
-                    )}
-                  </div>
-                  <span className="font-semibold text-gray-900">${(item.price * item.quantity).toFixed(2)}</span>
+    <div style={{ minHeight: '100vh', background: 'transparent', fontFamily: "'Inter', sans-serif" }}>
+      {/* Step indicator */}
+      <div style={{ background: 'rgba(255,255,255,.9)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderBottom: '1px solid #e2e8f0', padding: '1rem 1.5rem' }}>
+        <div className="max-w-4xl mx-auto flex items-center justify-between">
+          {STEPS.map((s, i) => (
+            <div key={s} style={{ display: 'flex', alignItems: 'center', flex: i < STEPS.length - 1 ? 1 : 'none' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{
+                  width: 32, height: 32, borderRadius: '50%',
+                  background: i === 0 ? '#e2e8f0' : i === 1 ? 'linear-gradient(135deg,#10b981,#0d9488)' : '#e2e8f0',
+                  color: i === 1 ? '#fff' : i === 0 ? '#94a3b8' : '#94a3b8',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '0.8125rem', fontWeight: 700, flexShrink: 0,
+                }}>
+                  {i === 0 ? '✓' : i + 1}
                 </div>
-              ))}
-              <div className="flex justify-between text-xl font-bold mt-6 pt-4 border-t-2">
-                <span>Total Amount</span>
-                <span className="text-green-600">${total.toFixed(2)}</span>
+                <span style={{ fontSize: '0.875rem', fontWeight: i === 1 ? 700 : 500, color: i === 1 ? '#0f172a' : '#94a3b8' }} className="hidden sm:inline">{s}</span>
               </div>
-            </>
-          )}
-        </div>
-
-        {/* Prescription Upload Section */}
-        {requiresPrescription && (
-          <div className="bg-red-50 border-2 border-red-200 rounded-lg p-6 mb-6">
-            <div className="flex items-start mb-3">
-              <span className="text-red-600 text-2xl mr-3">⚠️</span>
-              <div>
-                <p className="text-red-900 font-bold text-lg mb-2">Prescription Required</p>
-                <p className="text-red-700 mb-2">Some items in your order require a valid prescription with doctor's clear signature.</p>
-                <p className="text-red-600 text-sm">Please upload a clear image or PDF of your prescription with the doctor's signature.</p>
-              </div>
-            </div>
-
-            <div className="mt-4 p-4 bg-white rounded border border-red-200">
-              <label className="block mb-3">
-                <p className="text-gray-700 font-semibold mb-2">Upload Prescription *</p>
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp,application/pdf"
-                  onChange={handlePrescriptionChange}
-                  className="w-full px-4 py-2 border-2 border-dashed border-red-300 rounded-lg focus:outline-none focus:border-red-500 cursor-pointer hover:bg-gray-50"
-                  required
-                />
-                <p className="text-xs text-gray-500 mt-2">
-                  📄 Accepted formats: JPEG, PNG, WebP, PDF (Max 5MB)
-                </p>
-              </label>
-
-              {prescriptionFileName && (
-                <div className="flex items-center p-2 bg-green-50 border border-green-200 rounded mt-3">
-                  <span className="text-green-600 mr-2">✓</span>
-                  <span className="text-green-700 text-sm">{prescriptionFileName}</span>
-                </div>
+              {i < STEPS.length - 1 && (
+                <div style={{ flex: 1, height: 2, background: i === 0 ? '#10b981' : '#e2e8f0', margin: '0 12px', borderRadius: 1 }} />
               )}
             </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="max-w-4xl mx-auto" style={{ padding: '2rem 1rem' }}>
+        <div style={{ marginBottom: '1.75rem' }}>
+          <h1 style={{ fontWeight: 900, fontSize: 'clamp(1.75rem,4vw,2.25rem)', color: '#0f172a', margin: 0, letterSpacing: '-0.02em' }}>Checkout</h1>
+          <p style={{ color: '#64748b', margin: '4px 0 0', fontSize: '0.9375rem' }}>Review your order and confirm</p>
+        </div>
+
+        {cart.length === 0 ? (
+          <div className="card" style={{ padding: '4rem 2rem', textAlign: 'center' }}>
+            <div style={{ fontSize: 64, marginBottom: 16 }}>🛒</div>
+            <p style={{ color: '#64748b', fontSize: '1.125rem', marginBottom: 20 }}>Your cart is empty</p>
+            <Link to="/" className="btn btn-primary">Browse Medicines</Link>
           </div>
-        )}
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* ─ Left: Prescription + action ─ */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }} className="lg:col-span-2">
 
-        {/* Checkout Form */}
-        <form onSubmit={handleSubmit}>
-          <button
-            type="submit"
-            disabled={loading || cart.length === 0 || (requiresPrescription && !prescription)}
-            className={`w-full py-3 px-6 rounded-lg text-white text-lg font-semibold transition-all ${
-              loading || cart.length === 0 || (requiresPrescription && !prescription)
-                ? 'bg-gray-400 cursor-not-allowed opacity-50'
-                : 'bg-green-600 hover:bg-green-700 active:scale-95'
-            }`}
-          >
-            {loading ? (
-              <span className="flex items-center justify-center">
-                <span className="animate-spin mr-2">⏳</span>
-                Placing Order...
-              </span>
-            ) : (
-              'Place Order'
-            )}
-          </button>
-        </form>
+              {/* Prescription upload (only if needed) */}
+              {requiresPrescription && (
+                <div className="card animate-fadeInUp" style={{ padding: '1.5rem', border: '2px solid #fca5a5' }}>
+                  <div style={{ display: 'flex', gap: 12, marginBottom: '1rem' }}>
+                    <div style={{ width: 40, height: 40, background: '#fef2f2', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>⚠️</div>
+                    <div>
+                      <h3 style={{ fontWeight: 700, color: '#b91c1c', margin: '0 0 4px' }}>Prescription Required</h3>
+                      <p style={{ fontSize: '0.875rem', color: '#dc2626', margin: 0 }}>
+                        One or more items in your cart require a valid prescription with doctor's signature.
+                      </p>
+                    </div>
+                  </div>
 
-        {cart.length === 0 && (
-          <div className="text-center mt-8 p-6 bg-blue-50 rounded-lg">
-            <p className="text-blue-700 mb-4">Your cart is empty</p>
-            <button
-              onClick={() => navigate('/')}
-              className="text-blue-600 hover:text-blue-800 font-semibold"
-            >
-              Continue Shopping
-            </button>
+                  {/* Drop zone */}
+                  <div
+                    onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+                    onDragLeave={() => setDragOver(false)}
+                    onDrop={handleDrop}
+                    style={{
+                      position: 'relative', border: `2.5px dashed ${dragOver ? '#10b981' : prescription ? '#10b981' : '#fca5a5'}`,
+                      borderRadius: 12, padding: '1.75rem', textAlign: 'center',
+                      background: dragOver ? '#f0fdf4' : prescription ? '#f0fdf4' : '#fef2f2',
+                      transition: 'all .2s', cursor: 'pointer',
+                    }}
+                  >
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,application/pdf"
+                      onChange={e => handlePrescriptionChange(e.target.files[0])}
+                      required={requiresPrescription}
+                      style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer', width: '100%', height: '100%' }}
+                    />
+                    {prescription ? (
+                      <div>
+                        <div style={{ fontSize: 40, marginBottom: 8 }}>✅</div>
+                        <p style={{ fontWeight: 700, color: '#15803d', margin: '0 0 4px', fontSize: '0.9375rem' }}>{prescriptionFileName}</p>
+                        <p style={{ fontSize: '0.8125rem', color: '#16a34a', margin: 0 }}>Prescription uploaded · Click to change</p>
+                      </div>
+                    ) : (
+                      <div>
+                        <div style={{ fontSize: 40, marginBottom: 8 }}>📄</div>
+                        <p style={{ fontWeight: 700, color: '#374151', margin: '0 0 4px', fontSize: '0.9375rem' }}>
+                          {dragOver ? 'Drop file here' : 'Drag & drop or click to upload'}
+                        </p>
+                        <p style={{ fontSize: '0.8125rem', color: '#94a3b8', margin: 0 }}>JPEG · PNG · WebP · PDF — Max 5MB</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Place Order button */}
+              <form onSubmit={handleSubmit}>
+                <button
+                  type="submit"
+                  disabled={!canSubmit}
+                  className="btn btn-primary btn-block"
+                  style={{ borderRadius: 14, padding: '1rem', fontSize: '1.0625rem' }}
+                >
+                  {loading ? (
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <svg className="animate-spin-smooth" width="20" height="20" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,.3)" strokeWidth="3" /><path d="M12 2a10 10 0 0110 10" stroke="#fff" strokeWidth="3" strokeLinecap="round" /></svg>
+                      Placing Order…
+                    </span>
+                  ) : '🎉 Place Order'}
+                </button>
+                {requiresPrescription && !prescription && (
+                  <p style={{ fontSize: '0.8125rem', color: '#ef4444', textAlign: 'center', margin: '8px 0 0' }}>
+                    Please upload your prescription to continue
+                  </p>
+                )}
+              </form>
+
+              <Link to="/cart" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, color: '#64748b', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500 }}>
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                Back to Cart
+              </Link>
+            </div>
+
+            {/* ─ Order summary ─ */}
+            <div style={{ position: 'sticky', top: 80, height: 'fit-content' }}>
+              <div className="card animate-slideInRight" style={{ padding: '1.5rem' }}>
+                <h2 style={{ fontWeight: 800, fontSize: '1.125rem', color: '#0f172a', marginBottom: '1rem' }}>Order Summary</h2>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: '1rem' }}>
+                  {cart.map(item => (
+                    <div key={item._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
+                      <div style={{ flex: 1 }}>
+                        <p style={{ fontWeight: 600, fontSize: '0.875rem', color: '#0f172a', margin: '0 0 2px' }} className="line-clamp-1">{item.name}</p>
+                        <p style={{ fontSize: '0.75rem', color: '#94a3b8', margin: 0 }}>Qty: {item.quantity}</p>
+                        {item.requiresPrescription && (
+                          <span style={{ fontSize: '0.6875rem', color: '#ef4444', fontWeight: 600 }}>⚠️ Rx required</span>
+                        )}
+                      </div>
+                      <span style={{ fontWeight: 700, fontSize: '0.875rem', color: '#0f172a', flexShrink: 0 }}>
+                        NPR {(item.price * item.quantity).toFixed(2)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '1rem', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem', color: '#64748b' }}>
+                    <span>Subtotal</span>
+                    <span style={{ fontWeight: 600 }}>NPR {total.toFixed(2)}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem', color: '#64748b' }}>
+                    <span>Delivery</span>
+                    <span style={{ fontWeight: 600, color: delivery === 0 ? '#10b981' : undefined }}>{delivery === 0 ? 'FREE' : `NPR ${delivery}`}</span>
+                  </div>
+                  <div style={{ borderTop: '2px solid #f1f5f9', paddingTop: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontWeight: 800, fontSize: '1rem', color: '#0f172a' }}>Total</span>
+                    <span style={{ fontWeight: 900, fontSize: '1.375rem', color: '#10b981' }}>NPR {grandTotal.toFixed(2)}</span>
+                  </div>
+                </div>
+
+                <div style={{ marginTop: '1rem', padding: '0.75rem', background: '#f0fdf4', borderRadius: 10, display: 'flex', gap: 8 }}>
+                  <span style={{ fontSize: 16, flexShrink: 0 }}>🔒</span>
+                  <p style={{ fontSize: '0.75rem', color: '#15803d', margin: 0, lineHeight: 1.5 }}>Your payment is protected with end-to-end encryption</p>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>

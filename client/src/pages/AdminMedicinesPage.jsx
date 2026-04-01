@@ -1,280 +1,234 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import AdminLayout from '../components/AdminLayout';
+
+const CATEGORY_OPTIONS = ['Pain Relief', 'Cold & Cough', 'Vitamins', 'Antibiotics'];
 
 const AdminMedicinesPage = () => {
-  const navigate = useNavigate();
   const [medicines, setMedicines] = useState([]);
   const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    price: '',
-    quantity: '',
-    requiresPrescription: false,
-    tags: '',
-    categories: [],
-  });
+  const [formData, setFormData] = useState({ name: '', description: '', price: '', quantity: '', requiresPrescription: false, tags: '', categories: [] });
   const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [search, setSearch] = useState('');
 
-  const categoryOptions = ['Pain Relief', 'Cold & Cough', 'Vitamins', 'Antibiotics'];
-
-  useEffect(() => {
-    fetchMedicines();
-  }, []);
-
-  const handleLogout = async () => {
-    try {
-      await fetch('http://localhost:3000/api/auth/logout', {
-        method: 'POST',
-        credentials: 'include',
-      });
-      toast.success('Logged out successfully');
-      navigate('/');
-    } catch (err) {
-      toast.error('Logout failed');
-    }
-  };
+  useEffect(() => { fetchMedicines(); }, []);
 
   const fetchMedicines = async () => {
     setLoading(true);
-    try {
-      const response = await fetch('http://localhost:3000/api/medicines');
-      const data = await response.json();
-      setMedicines(data);
-    } catch (err) {
-      toast.error('Failed to load medicines');
-    } finally {
-      setLoading(false);
-    }
+    try { setMedicines(await (await fetch('http://localhost:3000/api/medicines')).json()); }
+    catch { toast.error('Failed to load medicines'); }
+    finally { setLoading(false); }
   };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     if (name === 'categories') {
-      setFormData({
-        ...formData,
-        categories: checked
-          ? [...formData.categories, value]
-          : formData.categories.filter(c => c !== value),
-      });
+      setFormData({ ...formData, categories: checked ? [...formData.categories, value] : formData.categories.filter(c => c !== value) });
     } else {
-      setFormData({
-        ...formData,
-        [name]: type === 'checkbox' ? checked : value,
-      });
+      setFormData({ ...formData, [name]: type === 'checkbox' ? checked : value });
     }
   };
 
-  const handleImageChange = (e) => {
-    setImage(e.target.files[0]);
+  const resetForm = () => {
+    setFormData({ name: '', description: '', price: '', quantity: '', requiresPrescription: false, tags: '', categories: [] });
+    setImage(null); setImagePreview(null); setShowForm(false);
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-
+    e.preventDefault(); setSubmitting(true);
     const data = new FormData();
-    Object.keys(formData).forEach(key => {
-      data.append(key, formData[key]);
-    });
-    if (image) {
-      data.append('image', image);
-    }
-
+    Object.keys(formData).forEach(k => data.append(k, formData[k]));
+    if (image) data.append('image', image);
     try {
-      const response = await fetch('http://localhost:3000/api/medicines', {
-        method: 'POST',
-        body: data,
-        credentials: 'include',
-      });
-
-      if (response.ok) {
-        toast.success('Medicine added successfully');
-        setFormData({
-          name: '',
-          description: '',
-          price: '',
-          quantity: '',
-          requiresPrescription: false,
-          tags: '',
-          categories: [],
-        });
-        setImage(null);
-        setShowForm(false);
-        fetchMedicines();
-      } else {
-        toast.error('Failed to add medicine');
-      }
-    } catch (err) {
-      toast.error('Network error');
-    }
+      const res = await fetch('http://localhost:3000/api/medicines', { method: 'POST', body: data, credentials: 'include' });
+      if (res.ok) { toast.success('Medicine added!'); resetForm(); fetchMedicines(); }
+      else toast.error('Failed to add medicine');
+    } catch { toast.error('Network error'); }
+    finally { setSubmitting(false); }
   };
 
-  if (loading) return <div className="text-center mt-10">Loading...</div>;
+  const handleDelete = async (id, name) => {
+    if (!window.confirm(`Delete "${name}"?`)) return;
+    try {
+      const res = await fetch(`http://localhost:3000/api/medicines/${id}`, { method: 'DELETE', credentials: 'include' });
+      if (res.ok) { setMedicines(prev => prev.filter(m => m._id !== id)); toast.success('Deleted'); }
+      else toast.error('Delete failed');
+    } catch { toast.error('Network error'); }
+  };
+
+  const filtered = medicines.filter(m =>
+    m.name.toLowerCase().includes(search.toLowerCase()) ||
+    (m.description || '').toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-md p-4 mb-8">
-        <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-blue-600">Pharmacy Admin</h1>
-          <div className="space-x-4">
-            <a href="/admin" className="text-gray-700 hover:text-blue-600 font-semibold">Dashboard</a>
-            <a href="/admin/orders" className="text-gray-700 hover:text-blue-600 font-semibold">Orders</a>
-            <button
-              onClick={handleLogout}
-              className="text-red-600 hover:text-red-700 font-semibold"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-      </nav>
+    <AdminLayout active="Medicines" pageTitle="Medicines" pageSubtitle={loading ? '…' : `${medicines.length} items in inventory`}>
 
-      <div className="container mx-auto p-4">
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-3xl font-bold">Manage Medicines</h2>
-          <button
-            onClick={() => setShowForm(!showForm)}
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
-          >
-            {showForm ? 'Cancel' : 'Add Medicine'}
-          </button>
+      {/* Action bar */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12, marginBottom: '1.5rem' }}>
+        <div style={{ position: 'relative', flex: '1 1 240px', maxWidth: 340 }}>
+          <svg style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', width: 16, height: 16 }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z" /></svg>
+          <input type="text" placeholder="Search medicines…" value={search} onChange={e => setSearch(e.target.value)} className="input-field" style={{ paddingLeft: '2.25rem', background: '#fff' }} />
         </div>
+        <button onClick={() => { setShowForm(!showForm); if (showForm) resetForm(); }} className="btn btn-primary" style={{ borderRadius: 10, flexShrink: 0 }}>
+          {showForm ? '✕ Cancel' : '+ Add Medicine'}
+        </button>
+      </div>
 
-        {showForm && (
-          <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-            <h3 className="text-xl font-semibold mb-4">Add New Medicine</h3>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <input
-                name="name"
-                type="text"
-                placeholder="Medicine Name"
-                value={formData.name}
-                onChange={handleChange}
-                className="w-full p-2 border border-gray-300 rounded"
-                required
-              />
-              <textarea
-                name="description"
-                placeholder="Description"
-                value={formData.description}
-                onChange={handleChange}
-                className="w-full p-2 border border-gray-300 rounded"
-                rows="3"
-              />
-              <input
-                name="tags"
-                type="text"
-                placeholder="Tags (comma-separated, e.g., pain relief, fever, cold)"
-                value={formData.tags}
-                onChange={handleChange}
-                className="w-full p-2 border border-gray-300 rounded"
-              />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input
-                  name="price"
-                  type="number"
-                  step="0.01"
-                  placeholder="Price"
-                  value={formData.price}
-                  onChange={handleChange}
-                  className="p-2 border border-gray-300 rounded"
-                  required
-                />
-                <input
-                  name="quantity"
-                  type="number"
-                  placeholder="Quantity in Stock"
-                  value={formData.quantity}
-                  onChange={handleChange}
-                  className="p-2 border border-gray-300 rounded"
-                  required
-                />
+      {/* Add medicine form */}
+      {showForm && (
+        <div className="card animate-fadeInDown" style={{ marginBottom: '1.75rem', padding: '1.5rem', borderTop: '3px solid #10b981' }}>
+          <h2 style={{ fontWeight: 700, fontSize: '1.0625rem', color: '#0f172a', marginBottom: '1.125rem' }}>New Medicine</h2>
+          <form onSubmit={handleSubmit}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4" style={{ marginBottom: '1rem' }}>
+              <div style={{ gridColumn: 'span 2' }}>
+                <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#374151', marginBottom: 5 }}>Name *</label>
+                <input name="name" type="text" placeholder="e.g. Paracetamol 500mg" value={formData.name} onChange={handleChange} required className="input-field" />
               </div>
-              <div className="flex items-center space-x-2">
-                <input
-                  name="requiresPrescription"
-                  type="checkbox"
-                  checked={formData.requiresPrescription}
-                  onChange={handleChange}
-                  className="w-4 h-4"
-                />
-                <label>Requires Prescription</label>
+              <div style={{ gridColumn: 'span 2' }}>
+                <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#374151', marginBottom: 5 }}>Description</label>
+                <textarea name="description" placeholder="Brief description…" value={formData.description} onChange={handleChange} rows={2} className="input-field" style={{ resize: 'vertical' }} />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Categories</label>
-                <div className="space-y-2 p-3 bg-gray-50 rounded">
-                  {categoryOptions.map((cat) => (
-                    <div key={cat} className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        name="categories"
-                        value={cat}
-                        checked={formData.categories.includes(cat)}
-                        onChange={handleChange}
-                        className="w-4 h-4"
-                      />
-                      <label className="text-sm">{cat}</label>
-                    </div>
-                  ))}
+                <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#374151', marginBottom: 5 }}>Price (NPR) *</label>
+                <input name="price" type="number" step="0.01" min="0" placeholder="0.00" value={formData.price} onChange={handleChange} required className="input-field" />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#374151', marginBottom: 5 }}>Stock *</label>
+                <input name="quantity" type="number" min="0" placeholder="0" value={formData.quantity} onChange={handleChange} required className="input-field" />
+              </div>
+              <div style={{ gridColumn: 'span 2' }}>
+                <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#374151', marginBottom: 5 }}>Tags <span style={{ fontWeight: 400, color: '#94a3b8' }}>(comma-separated)</span></label>
+                <input name="tags" type="text" placeholder="fever, headache, pain" value={formData.tags} onChange={handleChange} className="input-field" />
+              </div>
+            </div>
+
+            {/* Categories */}
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#374151', marginBottom: 7 }}>Categories</label>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
+                {CATEGORY_OPTIONS.map(cat => (
+                  <label key={cat} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 13px', borderRadius: 9999, border: `2px solid ${formData.categories.includes(cat) ? '#10b981' : '#e2e8f0'}`, background: formData.categories.includes(cat) ? '#f0fdf4' : '#fff', cursor: 'pointer', transition: 'all .15s', fontWeight: 600, fontSize: '0.8125rem', color: formData.categories.includes(cat) ? '#059669' : '#475569' }}>
+                    <input type="checkbox" name="categories" value={cat} checked={formData.categories.includes(cat)} onChange={handleChange} style={{ display: 'none' }} />
+                    {formData.categories.includes(cat) && <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
+                    {cat}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Prescription toggle */}
+            <div style={{ marginBottom: '1.125rem' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
+                <div onClick={() => setFormData({ ...formData, requiresPrescription: !formData.requiresPrescription })}
+                  style={{ width: 42, height: 23, borderRadius: 12, background: formData.requiresPrescription ? '#10b981' : '#e2e8f0', position: 'relative', flexShrink: 0, transition: 'background .2s', cursor: 'pointer' }}>
+                  <div style={{ position: 'absolute', top: 2, left: formData.requiresPrescription ? 21 : 2, width: 19, height: 19, borderRadius: '50%', background: '#fff', boxShadow: '0 1px 4px rgba(0,0,0,.15)', transition: 'left .2s' }} />
                 </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Medicine Image</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="w-full p-2 border border-gray-300 rounded"
-                />
-              </div>
-              <button
-                type="submit"
-                className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 w-full"
-              >
-                Add Medicine
-              </button>
-            </form>
-          </div>
-        )}
+                <span style={{ fontWeight: 600, fontSize: '0.875rem', color: '#374151' }}>Requires Prescription</span>
+              </label>
+            </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {medicines.map((medicine) => (
-            <div key={medicine._id} className="bg-white p-6 rounded-lg shadow-md">
-              {medicine.image && (
-                <img
-                  src={`http://localhost:3000/${medicine.image}`}
-                  alt={medicine.name}
-                  className="w-full h-40 object-cover mb-4 rounded"
-                />
-              )}
-              <h3 className="text-xl font-bold mb-2">{medicine.name}</h3>
-              <p className="text-gray-600 text-sm mb-2">{medicine.description}</p>
-              <p className="text-lg font-semibold text-green-600 mb-1">${medicine.price}</p>
-              <p className="text-sm mb-2">
-                Stock: <span className={medicine.quantity > 0 ? 'text-green-600' : 'text-red-600'}>
-                  {medicine.quantity}
-                </span>
-              </p>
-              {medicine.tags && medicine.tags.length > 0 && (
-                <p className="text-sm mb-2">
-                  <strong>Tags:</strong> {medicine.tags.join(', ')}
-                </p>
-              )}
-              {medicine.categories && medicine.categories.length > 0 && (
-                <p className="text-sm mb-2">
-                  <strong>Categories:</strong> {medicine.categories.join(', ')}
-                </p>
-              )}
-              {medicine.requiresPrescription && (
-                <p className="text-sm text-red-600 font-semibold">Requires Prescription</p>
-              )}
+            {/* Image upload */}
+            <div style={{ marginBottom: '1.25rem' }}>
+              <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#374151', marginBottom: 7 }}>Image</label>
+              <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                <label htmlFor="med-img" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '1rem 1.25rem', border: '2px dashed #cbd5e1', borderRadius: 12, cursor: 'pointer', background: '#f8fafc', transition: 'all .2s' }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = '#10b981'; e.currentTarget.style.background = '#f0fdf4'; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.background = '#f8fafc'; }}>
+                  <svg width="24" height="24" fill="none" stroke="#94a3b8" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
+                  <span style={{ fontSize: '0.8125rem', color: '#64748b', fontWeight: 600 }}>{image ? image.name : 'Upload image'}</span>
+                  <input id="med-img" type="file" accept="image/*" onChange={e => { const f = e.target.files[0]; if (!f) return; setImage(f); setImagePreview(URL.createObjectURL(f)); }} style={{ display: 'none' }} />
+                </label>
+                {imagePreview && (
+                  <div style={{ position: 'relative' }}>
+                    <img src={imagePreview} alt="Preview" style={{ width: 90, height: 90, objectFit: 'cover', borderRadius: 10, border: '2px solid #e2e8f0' }} />
+                    <button type="button" onClick={() => { setImage(null); setImagePreview(null); }}
+                      style={{ position: 'absolute', top: -7, right: -7, width: 20, height: 20, background: '#ef4444', color: '#fff', border: 'none', borderRadius: '50%', cursor: 'pointer', fontSize: 11, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>✕</button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button type="button" onClick={resetForm} className="btn btn-ghost" style={{ border: '1.5px solid #e2e8f0', borderRadius: 10 }}>Cancel</button>
+              <button type="submit" disabled={submitting} className="btn btn-primary" style={{ flex: 1, borderRadius: 10 }}>
+                {submitting ? 'Adding…' : '✓ Add Medicine'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Medicines grid */}
+      {loading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="card" style={{ overflow: 'hidden' }}>
+              <div className="skeleton" style={{ height: 150 }} />
+              <div style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div className="skeleton" style={{ height: 16, width: '65%' }} />
+                <div className="skeleton" style={{ height: 12, width: '100%' }} />
+                <div className="skeleton" style={{ height: 12, width: '50%' }} />
+              </div>
             </div>
           ))}
         </div>
-      </div>
-    </div>
+      ) : filtered.length === 0 ? (
+        <div className="card" style={{ padding: '4rem 2rem', textAlign: 'center' }}>
+          <div style={{ fontSize: 52, marginBottom: 14 }}>💊</div>
+          <h3 style={{ fontWeight: 700, color: '#0f172a', marginBottom: 6 }}>{search ? 'No results' : 'No medicines yet'}</h3>
+          <p style={{ color: '#64748b' }}>{search ? 'Try a different search term.' : 'Click "+ Add Medicine" to get started.'}</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {filtered.map(med => {
+            const stockStatus = med.quantity === 0 ? 'out' : med.quantity <= 5 ? 'low' : 'ok';
+            return (
+              <div key={med._id} className="card card-lift" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ height: 150, background: 'linear-gradient(135deg,#ecfdf5,#f0fdfa)', position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
+                  {med.image ? (
+                    <img src={`http://localhost:3000/${med.image}`} alt={med.name} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .35s' }}
+                      onMouseEnter={e => e.target.style.transform = 'scale(1.07)'}
+                      onMouseLeave={e => e.target.style.transform = 'scale(1)'} />
+                  ) : (
+                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 52 }}>💊</div>
+                  )}
+                  <span className={`badge ${med.requiresPrescription ? 'badge-danger' : 'badge-success'}`} style={{ position: 'absolute', top: 8, right: 8, fontSize: '0.6875rem' }}>
+                    {med.requiresPrescription ? 'Rx' : 'OTC'}
+                  </span>
+                </div>
+                <div style={{ padding: '1rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                  <h3 style={{ fontWeight: 700, fontSize: '0.9375rem', color: '#0f172a', marginBottom: 3, lineHeight: 1.35 }}>{med.name}</h3>
+                  <p style={{ fontSize: '0.8125rem', color: '#94a3b8', marginBottom: 8, lineHeight: 1.5, flex: 1 }}>{med.description || 'No description'}</p>
+                  {med.categories?.length > 0 && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 8 }}>
+                      {med.categories.map(c => <span key={c} className="badge badge-neutral" style={{ fontSize: '0.6875rem' }}>{c}</span>)}
+                    </div>
+                  )}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 10, borderTop: '1px solid #f1f5f9' }}>
+                    <div>
+                      <p style={{ fontWeight: 800, fontSize: '1.125rem', color: '#10b981', margin: 0, lineHeight: 1 }}>NPR {med.price}</p>
+                      <p style={{ fontSize: '0.75rem', fontWeight: 600, color: stockStatus === 'out' ? '#ef4444' : stockStatus === 'low' ? '#f59e0b' : '#10b981', margin: '2px 0 0' }}>
+                        {stockStatus === 'out' ? '● Out of stock' : stockStatus === 'low' ? `● Low: ${med.quantity}` : `● ${med.quantity} in stock`}
+                      </p>
+                    </div>
+                    <button onClick={() => handleDelete(med._id, med.name)}
+                      style={{ width: 32, height: 32, border: '1.5px solid #fee2e2', borderRadius: 8, background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444', transition: 'all .15s' }}
+                      onMouseEnter={e => { e.currentTarget.style.background = '#fef2f2'; e.currentTarget.style.borderColor = '#fca5a5'; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.borderColor = '#fee2e2'; }}>
+                      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </AdminLayout>
   );
 };
 

@@ -5,16 +5,20 @@ const mongoose = require("mongoose");
 const session = require("express-session");
 const MongoStore = require("connect-mongo").default;
 const cors = require("cors");
-const authRoutes = require("./routes/authRoutes");const medicineRoutes = require("./routes/medicineRoutes");
+const authRoutes = require("./routes/authRoutes");
+const medicineRoutes = require("./routes/medicineRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const app = express();
 
 app.use(cors({
-  origin: 'http://localhost:5173', // Vite dev server
+  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000'], // Vite dev server(s) and backend host
   credentials: true,
 }));
 
-app.use(express.json());app.use("/uploads", express.static("uploads"));app.use(
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use("/uploads", express.static("uploads"));
+app.use(
   session({
     secret: process.env.SESSION_SECRET || "keyboard cat",
     store: MongoStore.create({

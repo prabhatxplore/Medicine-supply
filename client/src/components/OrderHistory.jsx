@@ -49,13 +49,13 @@ const OrderHistory = () => {
                 {order.items.map((item, index) => (
                   <div key={index} className="flex justify-between">
                     <span>{item.medicine.name} x {item.quantity}</span>
-                    <span>${(item.price * item.quantity).toFixed(2)}</span>
+                    <span>NPR {(item.price * item.quantity).toFixed(2)}</span>
                   </div>
                 ))}
               </div>
               <div className="flex justify-between text-lg font-bold">
                 <span>Total</span>
-                <span>${order.totalAmount.toFixed(2)}</span>
+                <span>NPR {order.totalAmount.toFixed(2)}</span>
               </div>
               <p className="text-sm text-gray-500 mt-2">
                 Ordered on {new Date(order.createdAt).toLocaleDateString()}

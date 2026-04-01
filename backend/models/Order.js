@@ -34,6 +34,16 @@ const orderSchema = new mongoose.Schema(
       enum: ["Pending", "Processed", "Delivered"],
       default: "Pending",
     },
+    volunteer: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+    deliveryStatus: {
+      type: String,
+      enum: ["Unassigned", "Assigned", "Picked", "Delivered"],
+      default: "Unassigned",
+    },
     prescription: {
       type: String, // file path if uploaded
       default: "",

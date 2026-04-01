@@ -32,9 +32,19 @@ const ensureAdmin = (req, res, next) => {
   return res.status(403).json({ message: "Admin access required" });
 };
 
+const ensureVolunteer = (req, res, next) => {
+  if (req.session && req.session.role === "volunteer") {
+    return next();
+  }
+  return res.status(403).json({ message: "Volunteer access required" });
+};
+
 // Admin routes FIRST (more specific)
 router.get("/admin/all", ensureAuth, ensureAdmin, orderController.getAllOrders);
 router.put("/:id/status", ensureAuth, ensureAdmin, orderController.updateOrderStatus);
+
+
+
 
 // User routes
 router.post("/", ensureAuth, upload.single("prescription"), orderController.createOrder);
