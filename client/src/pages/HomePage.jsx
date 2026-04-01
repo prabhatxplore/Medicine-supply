@@ -1,6 +1,8 @@
 import { useEffect, useState, useCallback, useRef } from "react";
-import { Link, useSearchParams, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { notifyCartUpdated } from "../utils/cartNotify";
+import MedicineProductCard from "../components/MedicineProductCard";
 
 /* ── Category config with unique icons ── */
 const CATEGORIES = [
@@ -32,38 +34,13 @@ const HomePage = () => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [medicines, setMedicines] = useState([]);
-  const [allMedicines, setAllMedicines] = useState([]);
   const [loading, setLoading] = useState(true);
   const [initialLoad, setInitialLoad] = useState(true);
   const [isRefetching, setIsRefetching] = useState(false);
-  const [search, setSearch] = useState("");
   const isFetchingMedicines = useRef(false);
   const shouldFetchMe = useRef(true);
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [cartCount, setCartCount] = useState(0);
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-
-  /* ── Cart badge count ── */
-  const refreshCartCount = useCallback(() => {
-    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-    setCartCount(cart.reduce((s, i) => s + i.quantity, 0));
-  }, []);
-
-  useEffect(() => {
-    // Only prevent scroll on mobile when menu is open
-    if (mobileMenuOpen && window.innerWidth < 1024) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-
-    // Cleanup on unmount
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [mobileMenuOpen]);
 
   useEffect(() => {
     const init = async () => {
@@ -93,19 +70,17 @@ const HomePage = () => {
     init();
   }, [navigate]);
 
-  const fetchMedicines = useCallback(async (searchQuery = "", cat = "All") => {
+  const fetchMedicines = useCallback(async (cat = "All") => {
     if (isFetchingMedicines.current) return;
     isFetchingMedicines.current = true;
     if (!initialLoad) setIsRefetching(true);
     setLoading(true);
     try {
       const params = new URLSearchParams();
-      if (searchQuery.trim()) params.append("search", searchQuery);
       if (cat !== "All") params.append("category", cat);
       const url = `http://localhost:3000/api/medicines${params.toString() ? `?${params}` : ""}`;
       const res = await fetch(url);
       const data = await res.json();
-      setAllMedicines(data);
       setMedicines(data.slice(0, 6));
       setInitialLoad(false);
     } catch {
@@ -118,40 +93,11 @@ const HomePage = () => {
   }, [initialLoad]);
 
   useEffect(() => {
-    const q = searchParams.get("search");
-    if (q) {
-      setSearch(q);
-      fetchMedicines(q, selectedCategory);
-    } else {
-      fetchMedicines("", selectedCategory);
-    }
-  }, [searchParams, selectedCategory, fetchMedicines]);
+    fetchMedicines(selectedCategory);
+  }, [selectedCategory, fetchMedicines]);
 
   const handleCategoryChange = (cat) => {
     setSelectedCategory(cat);
-  };
-
-  const handleLogout = async () => {
-    try {
-      await fetch("http://localhost:3000/api/auth/logout", { method: "POST", credentials: "include" });
-      toast.success("Logged out");
-      setUser(null);
-      setMobileMenuOpen(false);
-      window.location.href = "/";
-    } catch { toast.error("Logout failed"); }
-  };
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    const t = search.trim();
-    if (t) {
-      fetchMedicines(t, selectedCategory);
-      window.history.replaceState({}, "", `/?search=${encodeURIComponent(t)}`);
-    } else {
-      fetchMedicines("", selectedCategory);
-      window.history.replaceState({}, "", "/");
-    }
-    setMobileMenuOpen(false);
   };
 
   const addToCart = (medicine) => {
@@ -165,20 +111,26 @@ const HomePage = () => {
       return;
     }
 
+    const stock = Number(medicine.quantity);
     const cart = JSON.parse(localStorage.getItem("cart") || "[]");
     const ex = cart.find((i) => i._id === medicine._id);
+    const nextQty = ex ? ex.quantity + 1 : 1;
+    if (nextQty > stock) {
+      toast.error(`Only ${stock} available for ${medicine.name}`);
+      return;
+    }
     if (ex) ex.quantity += 1;
     else cart.push({ ...medicine, quantity: 1 });
     localStorage.setItem("cart", JSON.stringify(cart));
-    refreshCartCount();
+    notifyCartUpdated();
     toast.success("Added to cart! 🛒");
   };
 
-  const displayedMedicines = search ? allMedicines : medicines;
+  const displayedMedicines = medicines;
 
   if (initialLoad && loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="flex-1 flex items-center justify-center min-h-[40vh]">
         <div className="text-3xl">⏳ Loading…</div>
       </div>
     );
@@ -196,222 +148,6 @@ const HomePage = () => {
           You can browse products but must login to add to cart or checkout.
         </div>
       )}
-
-      {/* ─────────── HEADER ─────────── */}
-      <header
-        style={{
-          background: "rgba(255,255,255,0.88)",
-          backdropFilter: "blur(20px) saturate(180%)",
-          WebkitBackdropFilter: "blur(20px) saturate(180%)",
-          borderBottom: "1px solid rgba(226,232,240,0.7)",
-          position: "sticky", top: 0, zIndex: 50,
-          boxShadow: "0 1px 12px rgba(0,0,0,.06)",
-        }}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 gap-4">
-
-            {/* Logo */}
-            <Link to="/" className="flex items-center gap-2.5 shrink-0">
-              <div style={{ background: "linear-gradient(135deg,#10b981,#0d9488)", borderRadius: 12, width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 12px rgba(16,185,129,.35)", flexShrink: 0 }}>
-                <span style={{ fontSize: 20 }}>💊</span>
-              </div>
-              <div className="hidden sm:block">
-                <span className="gradient-text-brand" style={{ fontWeight: 800, fontSize: "1.25rem", letterSpacing: "-0.02em" }}>PharmaCare</span>
-                <p style={{ fontSize: "0.6875rem", color: "#94a3b8", margin: 0, lineHeight: 1 }}>Your Health, Our Priority</p>
-              </div>
-            </Link>
-
-            {/* Desktop Search */}
-            <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-md relative">
-              <div style={{ position: "relative", width: "100%" }}>
-                <svg style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "#94a3b8", width: 18, height: 18, flexShrink: 0 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z" />
-                </svg>
-                <input
-                  type="text"
-                  placeholder="Search medicines, symptoms…"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="input-field"
-                  style={{ paddingLeft: "2.75rem", paddingRight: "5rem", borderRadius: 9999, background: "#f1f5f9", border: "2px solid transparent" }}
-                />
-                <button
-                  type="submit"
-                  className="btn btn-primary btn-sm"
-                  style={{ position: "absolute", right: 4, top: "50%", transform: "translateY(-50%)", borderRadius: 9999 }}
-                >
-                  Search
-                </button>
-              </div>
-            </form>
-
-            {/* Desktop Right Nav */}
-            <nav className="hidden lg:flex items-center gap-4">
-              <Link to="/products" style={{ fontSize: "0.875rem", fontWeight: 600, color: "#475569", marginRight: 12, textDecoration: "none" }}
-              onMouseEnter={e => e.currentTarget.style.color = "#10b981"}
-              onMouseLeave={e => e.currentTarget.style.color = "#475569"}>
-              Products
-            </Link>
-            <Link to="/cart" style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", width: 40, height: 40, borderRadius: 10, color: "#475569", transition: "all .15s" }}
-                onMouseEnter={e => { e.currentTarget.style.background = "#f1f5f9"; e.currentTarget.style.color = "#10b981"; }}
-                onMouseLeave={e => { e.currentTarget.style.background = ""; e.currentTarget.style.color = "#475569"; }}>
-                <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m1.6 8l-1 5h12M9 21a1 1 0 100-2 1 1 0 000 2zm10 0a1 1 0 100-2 1 1 0 000 2z" />
-                </svg>
-                {cartCount > 0 && (
-                  <span className="animate-scaleIn" style={{ position: "absolute", top: -3, right: -3, background: "#ef4444", color: "#fff", fontSize: "0.6rem", fontWeight: 700, borderRadius: 9999, minWidth: 18, height: 18, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 4px", lineHeight: 1 }}>
-                    {cartCount > 99 ? "99+" : cartCount}
-                  </span>
-                )}
-              </Link>
-
-              {user ? (
-                <div className="flex items-center gap-3 pl-4" style={{ borderLeft: "1px solid #e2e8f0" }}>
-                  <div style={{ width: 32, height: 32, background: "linear-gradient(135deg,#10b981,#0d9488)", borderRadius: 9999, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: "0.875rem" }}>
-                    {user.name?.[0]?.toUpperCase() || "U"}
-                  </div>
-                  <Link to="/orders" style={{ fontSize: "0.875rem", fontWeight: 600, color: "#475569" }}
-                    onMouseEnter={e => e.currentTarget.style.color = "#10b981"}
-                    onMouseLeave={e => e.currentTarget.style.color = "#475569"}>
-                    My Orders
-                  </Link>
-                  <button onClick={handleLogout} style={{ fontSize: "0.8125rem", fontWeight: 600, color: "#ef4444", background: "#fef2f2", border: "none", padding: "6px 14px", borderRadius: 9999, cursor: "pointer" }}
-                    onMouseEnter={e => { e.currentTarget.style.background = "#fee2e2"; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = "#fef2f2"; }}>
-                    Logout
-                  </button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-3 pl-4" style={{ borderLeft: "1px solid #e2e8f0" }}>
-                  <Link to="/login" style={{ fontSize: "0.875rem", fontWeight: 600, color: "#475569" }}
-                    onMouseEnter={e => e.currentTarget.style.color = "#10b981"}
-                    onMouseLeave={e => e.currentTarget.style.color = "#475569"}>
-                    Login
-                  </Link>
-                  <Link to="/signup" className="btn btn-primary btn-sm">Sign Up</Link>
-                </div>
-              )}
-            </nav>
-
-            {/* Mobile: cart + hamburger */}
-            <div className="flex items-center gap-2 lg:hidden">
-              <Link
-                to="/cart"
-                onClick={() => setMobileMenuOpen(false)}
-                style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", width: 38, height: 38, borderRadius: 10, color: "#475569" }}
-              >
-                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m1.6 8l-1 5h12M9 21a1 1 0 100-2 1 1 0 000 2zm10 0a1 1 0 100-2 1 1 0 000 2z" />
-                </svg>
-                {cartCount > 0 && (
-                  <span style={{ position: "absolute", top: -2, right: -2, background: "#ef4444", color: "#fff", fontSize: "0.6rem", fontWeight: 700, borderRadius: 9999, minWidth: 16, height: 16, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 3px" }}>
-                    {cartCount > 9 ? "9+" : cartCount}
-                  </span>
-                )}
-              </Link>
-              <button
-                className="lg:hidden"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                aria-label="Toggle menu"
-                aria-expanded={mobileMenuOpen}
-                style={{ width: 38, height: 38, display: "flex", alignItems: "center", justifyContent: "center", background: mobileMenuOpen ? "#f1f5f9" : "transparent", borderRadius: 10, border: "none", cursor: "pointer", color: "#475569" }}
-              >
-                {mobileMenuOpen ? (
-                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
-                ) : (
-                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16M4 18h16" /></svg>
-                )}
-              </button>
-            </div>
-          </div>
-
-          {/* Mobile Menu */}
-          {mobileMenuOpen && (
-            <>
-              {/* Backdrop */}
-              <div
-                className="lg:hidden"
-                onClick={() => setMobileMenuOpen(false)}
-                style={{
-                  position: 'fixed',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  background: 'rgba(0, 0, 0, 0.5)',
-                  zIndex: 40,
-                  backdropFilter: 'blur(2px)'
-                }}
-              />
-              <div className="lg:hidden animate-fadeInDown" style={{
-                borderTop: "1px solid #e2e8f0",
-                paddingBottom: "1rem",
-                paddingTop: "1rem",
-                background: "#fff",
-                position: "relative",
-                zIndex: 50
-              }}>
-              <form onSubmit={handleSearch} className="relative mb-4">
-                <svg style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "#94a3b8", width: 16, height: 16 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z" />
-                </svg>
-                <input
-                  type="text"
-                  placeholder="Search medicines…"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="input-field"
-                  style={{ paddingLeft: "2.5rem", borderRadius: 9999, background: "#f1f5f9", border: "2px solid transparent", fontSize: "0.9375rem" }}
-                />
-                <button
-                  type="submit"
-                  className="btn btn-primary btn-sm"
-                  style={{ position: "absolute", right: 4, top: "50%", transform: "translateY(-50%)", borderRadius: 9999 }}
-                >
-                  Search
-                </button>
-              </form>
-
-              {/* Mobile Navigation Links */}
-              <div className="space-y-3 mb-4">
-                <Link
-                  to="/products"
-                  onClick={() => setMobileMenuOpen(false)}
-                  style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, color: "#475569", textDecoration: "none", padding: "8px 0" }}
-                  onMouseEnter={e => e.currentTarget.style.color = "#10b981"}
-                  onMouseLeave={e => e.currentTarget.style.color = "#475569"}
-                >
-                  Products
-                </Link>
-              </div>
-
-              <div className="flex items-center justify-between">
-                {user ? (
-                  <div className="flex items-center gap-3">
-                    <div style={{ width: 32, height: 32, background: "linear-gradient(135deg,#10b981,#0d9488)", borderRadius: 9999, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: "0.875rem" }}>
-                      {user.name?.[0]?.toUpperCase() || "U"}
-                    </div>
-                    <span style={{ fontSize: "0.875rem", fontWeight: 600, color: "#475569" }}>{user.name}</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <Link to="/login" onClick={() => setMobileMenuOpen(false)} style={{ fontSize: "0.875rem", fontWeight: 600, color: "#475569", textDecoration: "none" }}>Login</Link>
-                    <Link to="/signup" onClick={() => setMobileMenuOpen(false)} className="btn btn-primary btn-sm">Sign Up</Link>
-                  </div>
-                )}
-                {user && (
-                  <div className="flex gap-3">
-                    <Link to="/orders" onClick={() => setMobileMenuOpen(false)} style={{ fontSize: "0.875rem", fontWeight: 600, color: "#10b981", textDecoration: "none" }}>My Orders</Link>
-                    <button onClick={handleLogout} style={{ fontSize: "0.8125rem", fontWeight: 600, color: "#ef4444", background: "none", border: "none", cursor: "pointer", padding: 0 }}>Logout</button>
-                  </div>
-                )}
-              </div>
-            </div>
-            </>
-          )}
-        </div>
-      </header>
 
       {/* ─────────── HERO ─────────── */}
       <section style={{ background: "linear-gradient(135deg, #ecfdf5 0%, #f0fdfa 30%, #eff6ff 70%, #f8fafc 100%)", padding: "5rem 1rem 4rem", position: "relative", overflow: "hidden" }}>
@@ -436,7 +172,7 @@ const HomePage = () => {
                 Verified medicines delivered to your doorstep. Trusted by thousands across Nepal.
               </p>
               <div className="flex flex-wrap gap-3">
-                <Link to={user ? "/#products" : "/signup"} className="btn btn-primary btn-lg">
+                <Link to="/products" className="btn btn-primary btn-lg">
                   Order Now
                   <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                 </Link>
@@ -547,22 +283,13 @@ const HomePage = () => {
       </section>
 
       {/* ─────────── PRODUCTS ─────────── */}
-      {(loading || displayedMedicines.length > 0) && (
-        <section id="products" style={{ padding: "3.5rem 1rem" }}>
+      <section id="products" style={{ padding: "3.5rem 1rem" }}>
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center justify-between mb-8 flex-wrap gap-3">
-              <h2 className="section-title">
-                {search ? `Results for "${search}"` : "Featured Medicines"}
-              </h2>
-              {search && (
-                <button
-                  onClick={() => { setSearch(""); handleCategoryChange("All"); window.history.replaceState({}, "", "/"); }}
-                  className="btn btn-ghost btn-sm"
-                  style={{ border: "2px solid #e2e8f0" }}
-                >
-                  ✕ Clear search
-                </button>
-              )}
+              <h2 className="section-title">Featured Medicines</h2>
+              <Link to="/products" className="btn btn-ghost btn-sm" style={{ border: "2px solid #e2e8f0" }}>
+                View all products →
+              </Link>
             </div>
 
             {loading ? (
@@ -572,98 +299,33 @@ const HomePage = () => {
             ) : displayedMedicines.length === 0 ? (
               <div className="card" style={{ padding: "4rem 2rem", textAlign: "center" }}>
                 <div style={{ fontSize: 64, marginBottom: 16 }}>🔍</div>
-                <p style={{ fontSize: "1.125rem", color: "#64748b", marginBottom: 20 }}>
-                  {search ? `No medicines found for "${search}"` : "No medicines available"}
+                <h3 className="section-title" style={{ marginBottom: 12 }}>No results found</h3>
+                <p style={{ fontSize: "1.0625rem", color: "#64748b", marginBottom: 24, maxWidth: "28rem", marginLeft: "auto", marginRight: "auto" }}>
+                  No featured medicines in this category yet. Try another category or browse the full catalog.
                 </p>
-                <button onClick={() => { setSearch(""); handleCategoryChange("All"); window.history.replaceState({}, "", "/"); }} className="btn btn-primary">
-                  Clear filters
-                </button>
+                <div className="flex flex-wrap gap-3 justify-center">
+                  <button type="button" onClick={() => setSelectedCategory("All")} className="btn btn-primary">
+                    Show all categories
+                  </button>
+                  <Link to="/products" className="btn btn-secondary">
+                    Browse catalog
+                  </Link>
+                </div>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 stagger-children">
-                {displayedMedicines.map((med) => (
-                  <div key={med._id} className="card card-lift animate-fadeInUp" style={{ overflow: "hidden", display: "flex", flexDirection: "column" }}>
-                    {/* Image */}
-                    <div style={{ position: "relative", height: 192, background: "#f8fafc", overflow: "hidden" }}>
-                      {med.image ? (
-                        <img src={`http://localhost:3000/${med.image}`} alt={med.name} style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform .4s ease" }}
-                          onMouseEnter={e => e.target.style.transform = "scale(1.08)"}
-                          onMouseLeave={e => e.target.style.transform = "scale(1)"}
-                        />
-                      ) : (
-                        <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(135deg,#ecfdf5,#f0fdfa)", fontSize: 56 }}>💊</div>
-                      )}
-                      {/* Category badge */}
-                      {med.category && (
-                        <div style={{ position: "absolute", top: 10, left: 10 }}>
-                          <span className="badge badge-neutral" style={{ background: "rgba(255,255,255,.9)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", fontSize: "0.7rem" }}>
-                            {med.category}
-                          </span>
-                        </div>
-                      )}
-                      {/* Low stock badge */}
-                      {med.quantity > 0 && med.quantity <= 5 && (
-                        <div style={{ position: "absolute", top: 10, right: 10 }}>
-                          <span className="badge badge-orange">⚠ Low Stock</span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Content */}
-                    <div style={{ padding: "1.25rem", display: "flex", flexDirection: "column", flex: 1 }}>
-                      <h3 style={{ fontWeight: 700, fontSize: "1rem", color: "#0f172a", marginBottom: 6, lineHeight: 1.35 }} className="line-clamp-2">{med.name}</h3>
-                      <p style={{ fontSize: "0.8125rem", color: "#94a3b8", marginBottom: 12, lineHeight: 1.5 }} className="line-clamp-2 flex-1">
-                        {med.description || "Quality medicine from verified suppliers"}
-                      </p>
-
-                      {med.requiresPrescription && (
-                        <div className="badge badge-danger" style={{ marginBottom: 10, alignSelf: "flex-start" }}>
-                          ⚠️ Prescription Required
-                        </div>
-                      )}
-
-                      <div className="flex items-center justify-between mb-4">
-                        <div>
-                          <p style={{ fontSize: "0.6875rem", color: "#94a3b8", marginBottom: 2 }}>Price</p>
-                          <span style={{ fontSize: "1.625rem", fontWeight: 800, color: "#10b981", lineHeight: 1 }}>
-                            NPR {med.price}
-                          </span>
-                        </div>
-                        {med.quantity === 0 ? (
-                          <span className="badge badge-danger">Out of Stock</span>
-                        ) : (
-                          <span style={{ fontSize: "0.75rem", color: "#94a3b8" }}>{med.quantity} left</span>
-                        )}
-                      </div>
-
-                      <div className="flex gap-2">
-                        <Link to={`/medicine/${med._id}`} className="btn btn-secondary btn-sm" style={{ flex: 1, borderRadius: 10 }}>
-                          Details
-                        </Link>
-                        <button
-                          onClick={() => addToCart(med)}
-                          disabled={med.quantity === 0}
-                          className="btn btn-sm"
-                          style={{
-                            flex: 1,
-                            borderRadius: 10,
-                            background: med.quantity === 0 ? "#e2e8f0" : "linear-gradient(135deg,#10b981,#0d9488)",
-                            color: med.quantity === 0 ? "#94a3b8" : "#fff",
-                            border: "none",
-                            cursor: med.quantity === 0 ? "not-allowed" : "pointer",
-                          }}
-                        >
-                          🛒 Add
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+                {displayedMedicines.map((med, idx) => (
+                  <MedicineProductCard
+                    key={med._id}
+                    medicine={med}
+                    onAddToCart={() => addToCart(med)}
+                    animationDelay={`${Math.min(idx, 5) * 60}ms`}
+                  />
                 ))}
               </div>
             )}
           </div>
         </section>
-      )}
 
       {/* ─────────── HOW IT WORKS ─────────── */}
       <section style={{ background: "linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#0f2027 100%)", padding: "4rem 1rem", position: "relative", overflow: "hidden" }}>
@@ -771,7 +433,7 @@ const HomePage = () => {
             <div>
               <h4 style={{ fontWeight: 700, color: "#fff", marginBottom: 14, fontSize: "0.9375rem" }}>Quick Links</h4>
               <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 10 }}>
-                {[["Home", "/"], ["Shop", "/#products"], ["Cart", "/cart"]].map(([lbl, href]) => (
+                {[["Home", "/"], ["Shop", "/products"], ["Cart", "/cart"]].map(([lbl, href]) => (
                   <li key={lbl}><Link to={href} style={{ fontSize: "0.875rem", color: "#64748b", textDecoration: "none", transition: "color .15s" }}
                     onMouseEnter={e => e.target.style.color = "#fff"}
                     onMouseLeave={e => e.target.style.color = "#64748b"}>{lbl}</Link></li>

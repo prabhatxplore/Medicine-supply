@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { notifyCartUpdated } from '../utils/cartNotify';
 
 const MedicineDetailsPage = () => {
   const { id } = useParams();
@@ -26,11 +27,18 @@ const MedicineDetailsPage = () => {
   }, [id]);
 
   const addToCart = () => {
+    const stock = Number(medicine.quantity);
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
     const ex = cart.find(i => i._id === medicine._id);
+    const currentInCart = ex ? ex.quantity : 0;
+    if (currentInCart + quantity > stock) {
+      toast.error(`Only ${stock} available (${currentInCart} already in cart)`);
+      return;
+    }
     if (ex) ex.quantity += quantity;
     else cart.push({ ...medicine, quantity });
     localStorage.setItem('cart', JSON.stringify(cart));
+    notifyCartUpdated();
     toast.success(`Added ${quantity} × ${medicine.name} to cart!`);
     setQuantity(1);
     setAddedToCart(true);
@@ -38,7 +46,7 @@ const MedicineDetailsPage = () => {
   };
 
   if (loading) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Inter', sans-serif" }}>
+    <div className="flex-1 flex items-center justify-center min-h-[40vh]" style={{ fontFamily: "'Inter', sans-serif" }}>
       <div style={{ textAlign: 'center' }}>
         <div style={{ width: 48, height: 48, border: '4px solid #e2e8f0', borderTopColor: '#10b981', borderRadius: '50%', margin: '0 auto 16px', animation: 'spin-smooth .8s linear infinite' }} />
         <p style={{ color: '#64748b', fontWeight: 500 }}>Loading medicine details…</p>
@@ -47,7 +55,7 @@ const MedicineDetailsPage = () => {
   );
 
   if (!medicine) return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', fontFamily: "'Inter', sans-serif", padding: '2rem' }}>
+    <div className="flex-1 flex flex-col items-center justify-center min-h-[40vh] p-8" style={{ fontFamily: "'Inter', sans-serif" }}>
       <div style={{ fontSize: 64, marginBottom: 20 }}>🔍</div>
       <h2 style={{ fontWeight: 800, color: '#0f172a', marginBottom: 8 }}>Medicine not found</h2>
       <Link to="/" className="btn btn-primary" style={{ marginTop: 12 }}>← Back to Home</Link>
@@ -57,20 +65,19 @@ const MedicineDetailsPage = () => {
   const stockStatus = medicine.quantity === 0 ? 'out' : medicine.quantity <= 5 ? 'low' : 'ok';
 
   return (
-    <div style={{ minHeight: '100vh', background: 'transparent', fontFamily: "'Inter', sans-serif" }}>
-      {/* Breadcrumb */}
-      <div style={{ background: 'rgba(255,255,255,.88)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderBottom: '1px solid #e2e8f0', padding: '0.875rem 1.5rem' }}>
-        <div className="max-w-6xl mx-auto flex items-center gap-2" style={{ fontSize: '0.875rem', color: '#94a3b8', flexWrap: 'wrap' }}>
-          <Link to="/" style={{ color: '#10b981', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
+    <div style={{ background: 'transparent', fontFamily: "'Inter', sans-serif" }}>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6" style={{ paddingTop: '0.5rem', paddingBottom: '0.5rem' }}>
+        <div className="flex items-center gap-2 text-sm text-slate-500 flex-wrap">
+          <Link to="/" className="text-emerald-600 font-semibold no-underline inline-flex items-center gap-1 hover:text-emerald-700">
             <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
             Home
           </Link>
-          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-          <span className="line-clamp-1" style={{ maxWidth: '20ch' }}>{medicine.name}</span>
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" className="text-slate-400 shrink-0"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+          <span className="line-clamp-1 text-slate-700 font-medium max-w-[20ch]">{medicine.name}</span>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto" style={{ padding: '2rem 1rem' }}>
+      <div className="max-w-6xl mx-auto" style={{ padding: '2rem 1rem', paddingTop: 0 }}>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
 
           {/* ─ Image section ─ */}

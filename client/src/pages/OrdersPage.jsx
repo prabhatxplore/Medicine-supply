@@ -67,7 +67,7 @@ const OrdersPage = () => {
   }, []);
 
   if (loading) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Inter', sans-serif" }}>
+    <div className="flex-1 flex items-center justify-center min-h-[40vh]" style={{ fontFamily: "'Inter', sans-serif" }}>
       <div style={{ textAlign: 'center' }}>
         <div style={{ width: 48, height: 48, border: '4px solid #e2e8f0', borderTopColor: '#10b981', borderRadius: '50%', margin: '0 auto 16px', animation: 'spin-smooth .8s linear infinite' }} />
         <p style={{ color: '#64748b', fontWeight: 500 }}>Loading your orders…</p>
@@ -76,17 +76,7 @@ const OrdersPage = () => {
   );
 
   return (
-    <div style={{ minHeight: '100vh', background: 'transparent', fontFamily: "'Inter', sans-serif" }}>
-      {/* Back nav */}
-      <div style={{ background: 'rgba(255,255,255,.88)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderBottom: '1px solid #e2e8f0', padding: '0.875rem 1.5rem', display: 'flex', alignItems: 'center', gap: 12 }}>
-        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#64748b', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500 }}>
-          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-          Back to Home
-        </Link>
-        <span style={{ color: '#e2e8f0' }}>|</span>
-        <span style={{ color: '#0f172a', fontWeight: 700 }}>My Orders</span>
-      </div>
-
+    <div style={{ background: 'transparent', fontFamily: "'Inter', sans-serif" }}>
       <div className="max-w-4xl mx-auto" style={{ padding: '2rem 1rem' }}>
         <div style={{ marginBottom: '1.75rem' }}>
           <h1 style={{ fontWeight: 900, fontSize: 'clamp(1.75rem,4vw,2.25rem)', color: '#0f172a', margin: 0, letterSpacing: '-0.02em' }}>Order History</h1>

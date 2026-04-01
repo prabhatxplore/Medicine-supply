@@ -57,7 +57,7 @@ const LoginPage = () => {
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', fontFamily: "'Inter', sans-serif" }}>
+    <div style={{ flex: 1, display: 'flex', minHeight: 0, fontFamily: "'Inter', sans-serif" }}>
 
       {/* ─── Left: Decorative Panel (desktop only) ─── */}
       <div className="hidden lg:flex" style={{
@@ -104,16 +104,8 @@ const LoginPage = () => {
       </div>
 
       {/* ─── Right: Form Panel ─── */}
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem 1rem', background: '#f8fafc', minHeight: '100vh' }}>
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem 1rem', background: '#f8fafc', minHeight: 0 }}>
         <div className="animate-scaleIn" style={{ width: '100%', maxWidth: 420 }}>
-
-          {/* Mobile logo */}
-          <div className="flex lg:hidden justify-center mb-8">
-            <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-              <div style={{ width: 44, height: 44, background: 'linear-gradient(135deg,#10b981,#0d9488)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>💊</div>
-              <span style={{ fontWeight: 800, fontSize: '1.375rem', color: '#0f172a' }}>PharmaCare</span>
-            </Link>
-          </div>
 
           {/* Card */}
           <div className="card" style={{ padding: '2rem', borderRadius: 20 }}>

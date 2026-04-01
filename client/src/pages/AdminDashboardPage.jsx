@@ -68,20 +68,7 @@ const AdminDashboardPage = () => {
           </div>
 
           {/* Volunteer portal */}
-          <div className="card" style={{ padding: '1.25rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{ width: 42, height: 42, background: '#f5f3ff', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>🤝</div>
-              <div>
-                <p style={{ fontWeight: 700, color: '#0f172a', margin: 0 }}>Volunteer Portal</p>
-                <p style={{ fontSize: '0.875rem', color: '#64748b', margin: 0 }}>Manage delivery volunteers</p>
-              </div>
-            </div>
-            <Link to="/volunteer/login" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 16px', border: '2px solid #8b5cf6', borderRadius: 10, color: '#8b5cf6', fontWeight: 700, textDecoration: 'none', fontSize: '0.875rem', transition: 'all .15s' }}
-              onMouseEnter={e => { e.currentTarget.style.background = '#8b5cf6'; e.currentTarget.style.color = '#fff'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#8b5cf6'; }}>
-              Open Portal →
-            </Link>
-          </div>
+          
         </>
       )}
     </AdminLayout>

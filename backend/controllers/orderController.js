@@ -1,5 +1,34 @@
+const mongoose = require("mongoose");
 const Order = require("../models/Order");
 const Medicine = require("../models/Medicine");
+
+function normalizeOrderItems(raw) {
+  let items = [];
+  if (typeof raw === "string") {
+    try {
+      items = JSON.parse(raw);
+    } catch {
+      return null;
+    }
+  } else if (Array.isArray(raw)) {
+    items = raw;
+  }
+  if (!Array.isArray(items) || items.length === 0) return null;
+
+  const normalized = [];
+  for (const row of items) {
+    const id = row.medicineId || row.medicine;
+    if (!id || !mongoose.Types.ObjectId.isValid(String(id))) {
+      return null;
+    }
+    const qty = Number(row.quantity);
+    if (!Number.isFinite(qty) || qty < 1 || qty !== Math.floor(qty)) {
+      return null;
+    }
+    normalized.push({ medicineId: String(id), quantity: qty });
+  }
+  return normalized;
+}
 
 exports.createOrder = async (req, res) => {
   if (!req.session.userId) {
@@ -7,30 +36,30 @@ exports.createOrder = async (req, res) => {
   }
 
   try {
-    // Parse items from FormData (sent as JSON string)
-    let items = [];
-    if (typeof req.body.items === 'string') {
-      items = JSON.parse(req.body.items);
-    } else if (Array.isArray(req.body.items)) {
-      items = req.body.items;
-    }
-
-    if (!items || items.length === 0) {
-      return res.status(400).json({ message: "Cart is empty" });
+    const items = normalizeOrderItems(req.body.items);
+    if (!items) {
+      return res.status(400).json({ message: "Invalid or empty cart items" });
     }
 
     let totalAmount = 0;
     const orderItems = [];
     let requiresPrescription = false;
+    const snapshot = [];
 
-    // Validate all medicines and check if prescription is required
     for (const item of items) {
-      const medicine = await Medicine.findById(item.medicineId);
+      const medicine = await Medicine.findById(item.medicineId).lean();
       if (!medicine) {
-        return res.status(404).json({ message: `Medicine ${item.medicineId} not found` });
+        return res.status(404).json({ message: "One or more products are no longer available" });
       }
-      if (medicine.quantity < item.quantity) {
-        return res.status(400).json({ message: `Insufficient stock for ${medicine.name}` });
+      const price = Number(medicine.price);
+      const stock = Number(medicine.quantity);
+      if (!Number.isFinite(price) || price < 0) {
+        return res.status(400).json({ message: `Invalid price for ${medicine.name}` });
+      }
+      if (!Number.isFinite(stock) || stock < item.quantity) {
+        return res.status(400).json({
+          message: `Insufficient stock for ${medicine.name}. Only ${Math.max(0, stock)} available.`,
+        });
       }
       if (medicine.requiresPrescription) {
         requiresPrescription = true;
@@ -38,20 +67,38 @@ exports.createOrder = async (req, res) => {
       orderItems.push({
         medicine: medicine._id,
         quantity: item.quantity,
-        price: medicine.price,
+        price,
       });
-      totalAmount += medicine.price * item.quantity;
+      totalAmount += price * item.quantity;
+      snapshot.push({ id: item.medicineId, quantity: item.quantity, name: medicine.name });
     }
 
-    // Check if prescription is required and provided
     if (requiresPrescription && !req.file) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         message: "Prescription with doctor signature is required for this order",
-        requiresPrescription: true 
+        requiresPrescription: true,
       });
     }
 
     const prescriptionPath = req.file ? req.file.path : "";
+    const decremented = [];
+
+    for (const row of snapshot) {
+      const updated = await Medicine.findOneAndUpdate(
+        { _id: row.id, quantity: { $gte: row.quantity } },
+        { $inc: { quantity: -row.quantity } },
+        { new: true }
+      );
+      if (!updated) {
+        for (const d of decremented) {
+          await Medicine.findByIdAndUpdate(d.id, { $inc: { quantity: d.quantity } });
+        }
+        return res.status(400).json({
+          message: `Could not reserve stock for ${row.name}. It may have just sold out—refresh and try again.`,
+        });
+      }
+      decremented.push({ id: row.id, quantity: row.quantity });
+    }
 
     const newOrder = new Order({
       user: req.session.userId,
@@ -60,10 +107,18 @@ exports.createOrder = async (req, res) => {
       prescription: prescriptionPath,
     });
 
-    await newOrder.save();
-    res.status(201).json({ 
-      message: "Order placed successfully", 
-      order: newOrder 
+    try {
+      await newOrder.save();
+    } catch (saveErr) {
+      for (const d of decremented) {
+        await Medicine.findByIdAndUpdate(d.id, { $inc: { quantity: d.quantity } });
+      }
+      throw saveErr;
+    }
+
+    res.status(201).json({
+      message: "Order placed successfully",
+      order: newOrder,
     });
   } catch (err) {
     console.error("createOrder error", err);

@@ -18,10 +18,12 @@ const upload = multer({
 });
 
 router.get("/", medicineController.getAllMedicines);
-router.get("/:id", medicineController.getMedicineById);
 
-// Admin route
+// Admin routes (before /:id GET so paths stay unambiguous)
 router.post("/", ensureAuth, ensureAdmin, upload.single("image"), medicineController.createMedicine);
+router.put("/:id", ensureAuth, ensureAdmin, upload.single("image"), medicineController.updateMedicine);
 router.delete("/:id", ensureAuth, ensureAdmin, medicineController.deleteMedicine);
+
+router.get("/:id", medicineController.getMedicineById);
 
 module.exports = router;

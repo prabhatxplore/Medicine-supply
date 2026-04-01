@@ -118,7 +118,7 @@ const SignupPage = () => {
   );
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', fontFamily: "'Inter', sans-serif" }}>
+    <div style={{ flex: 1, display: 'flex', minHeight: 0, fontFamily: "'Inter', sans-serif" }}>
 
       {/* ─── Left panel (desktop) ─── */}
       <div className="hidden lg:flex" style={{
@@ -167,16 +167,8 @@ const SignupPage = () => {
       </div>
 
       {/* ─── Right: Form ─── */}
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem 1rem', background: '#f8fafc', overflowY: 'auto' }}>
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem 1rem', background: '#f8fafc', overflowY: 'auto', minHeight: 0 }}>
         <div className="animate-scaleIn" style={{ width: '100%', maxWidth: 440 }}>
-
-          {/* Mobile logo */}
-          <div className="flex lg:hidden justify-center mb-6">
-            <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-              <div style={{ width: 40, height: 40, background: 'linear-gradient(135deg,#10b981,#0d9488)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>💊</div>
-              <span style={{ fontWeight: 800, fontSize: '1.25rem', color: '#0f172a' }}>PharmaCare</span>
-            </Link>
-          </div>
 
           {/* Mobile step indicator */}
           <div className="lg:hidden flex items-center gap-2 mb-6 justify-center">

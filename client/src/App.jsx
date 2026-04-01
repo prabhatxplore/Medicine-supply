@@ -16,6 +16,7 @@ import AdminOrdersPage from './pages/AdminOrdersPage';
 import VolunteerLoginPage from './pages/VolunteerLoginPage';
 import VolunteerDashboardPage from './pages/VolunteerDashboardPage';
 import ProductsPage from './pages/ProductsPage';
+import PublicLayout from './layouts/PublicLayout';
 
 function App() {
   return (
@@ -43,14 +44,16 @@ function App() {
       />
       <Router>
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/signup" element={<SignupPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/medicine/:id" element={<MedicineDetailsPage />} />
-          <Route path="/cart" element={<CartPage />} />
-          <Route path="/checkout" element={<CheckoutPage />} />
-          <Route path="/orders" element={<OrdersPage />} />
-          <Route path="/products" element={<ProductsPage />} />
+          <Route element={<PublicLayout />}>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/signup" element={<SignupPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/medicine/:id" element={<MedicineDetailsPage />} />
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/orders" element={<OrdersPage />} />
+            <Route path="/products" element={<ProductsPage />} />
+          </Route>
           
           {/* Admin Routes */}
           <Route path="/admin/login" element={<AdminLoginPage />} />

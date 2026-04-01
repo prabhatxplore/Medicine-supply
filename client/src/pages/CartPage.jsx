@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { notifyCartUpdated } from '../utils/cartNotify';
 
 const CartPage = () => {
   const [cart, setCart] = useState([]);
@@ -12,6 +13,7 @@ const CartPage = () => {
   const save = (updated) => {
     setCart(updated);
     localStorage.setItem('cart', JSON.stringify(updated));
+    notifyCartUpdated();
   };
 
   const updateQty = (id, qty) => {
@@ -28,17 +30,7 @@ const CartPage = () => {
   const itemCount = cart.reduce((s, i) => s + i.quantity, 0);
 
   return (
-    <div style={{ minHeight: '100vh', background: 'transparent', fontFamily: "'Inter', sans-serif" }}>
-      {/* Back nav */}
-      <div style={{ background: 'rgba(255,255,255,.85)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderBottom: '1px solid #e2e8f0', padding: '0.875rem 1.5rem', display: 'flex', alignItems: 'center', gap: 12 }}>
-        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#64748b', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500 }}>
-          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-          Continue Shopping
-        </Link>
-        <span style={{ color: '#e2e8f0' }}>|</span>
-        <span style={{ color: '#0f172a', fontWeight: 700 }}>Shopping Cart</span>
-      </div>
-
+    <div style={{ background: 'transparent', fontFamily: "'Inter', sans-serif" }}>
       <div className="max-w-6xl mx-auto" style={{ padding: '2rem 1rem' }}>
         {/* Heading */}
         <div style={{ marginBottom: '1.75rem' }}>

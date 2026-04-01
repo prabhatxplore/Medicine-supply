@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { notifyCartUpdated } from '../utils/cartNotify';
 
 const STEPS = ['Cart', 'Checkout', 'Confirmed'];
 
@@ -46,6 +47,7 @@ const CheckoutPage = () => {
       });
       if (res.ok) {
         localStorage.removeItem('cart');
+        notifyCartUpdated();
         toast.success('Order placed successfully! 🎉');
         navigate('/orders');
       } else {
@@ -63,7 +65,7 @@ const CheckoutPage = () => {
   const canSubmit = !loading && cart.length > 0 && (!requiresPrescription || prescription);
 
   return (
-    <div style={{ minHeight: '100vh', background: 'transparent', fontFamily: "'Inter', sans-serif" }}>
+    <div style={{ background: 'transparent', fontFamily: "'Inter', sans-serif" }}>
       {/* Step indicator */}
       <div style={{ background: 'rgba(255,255,255,.9)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderBottom: '1px solid #e2e8f0', padding: '1rem 1.5rem' }}>
         <div className="max-w-4xl mx-auto flex items-center justify-between">
