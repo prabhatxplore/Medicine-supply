@@ -17,6 +17,8 @@ import VolunteerLoginPage from './pages/VolunteerLoginPage';
 import VolunteerDashboardPage from './pages/VolunteerDashboardPage';
 import ProductsPage from './pages/ProductsPage';
 import PublicLayout from './layouts/PublicLayout';
+import MyPrescriptionsPage from './pages/MyPrescriptionsPage';
+import AdminPrescriptionsPage from './pages/AdminPrescriptionsPage';
 
 function App() {
   return (
@@ -53,6 +55,7 @@ function App() {
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/orders" element={<OrdersPage />} />
             <Route path="/products" element={<ProductsPage />} />
+            <Route path="/prescriptions" element={<MyPrescriptionsPage />} />
           </Route>
           
           {/* Admin Routes */}
@@ -60,6 +63,7 @@ function App() {
           <Route path="/admin" element={<AdminDashboardPage />} />
           <Route path="/admin/medicines" element={<AdminMedicinesPage />} />
           <Route path="/admin/orders" element={<AdminOrdersPage />} />
+          <Route path="/admin/prescriptions" element={<AdminPrescriptionsPage />} />
 
           {/* Volunteer Routes */}
           <Route path="/volunteer/login" element={<VolunteerLoginPage />} />

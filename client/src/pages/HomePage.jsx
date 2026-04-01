@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { notifyCartUpdated } from "../utils/cartNotify";
 import MedicineProductCard from "../components/MedicineProductCard";
+import PrescriptionUploadSection from "../components/PrescriptionUploadSection";
 
 /* ── Category config with unique icons ── */
 const CATEGORIES = [
@@ -239,6 +240,11 @@ const HomePage = () => {
             ))}
           </div>
         </div>
+      </section>
+
+      {/* ─────────── PRESCRIPTION UPLOAD ─────────── */}
+      <section style={{ background: "#f8fafc", padding: "0 0 1rem" }}>
+        <PrescriptionUploadSection isAuthenticated={isAuthenticated} userRole={user?.role} />
       </section>
 
       {/* ─────────── CATEGORIES ─────────── */}

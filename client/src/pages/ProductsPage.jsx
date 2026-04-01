@@ -35,6 +35,9 @@ const ProductsPage = () => {
             <Link to="/cart" className="btn btn-primary btn-lg">
               View cart
             </Link>
+            <Link to="/prescriptions" className="btn btn-secondary btn-lg">
+              Upload prescription
+            </Link>
             <Link to="/" className="btn btn-secondary btn-lg">
               ← Back to home
             </Link>

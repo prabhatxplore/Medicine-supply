@@ -15,18 +15,24 @@ const KPICard = ({ icon, label, value, color, bg, trend }) => (
 );
 
 const AdminDashboardPage = () => {
-  const [stats, setStats] = useState({ totalMedicines: 0, totalOrders: 0, pendingOrders: 0 });
+  const [stats, setStats] = useState({ totalMedicines: 0, totalOrders: 0, pendingOrders: 0, pendingRx: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
       try {
-        const [medRes, ordRes] = await Promise.all([
+        const [medRes, ordRes, rxRes] = await Promise.all([
           fetch('http://localhost:3000/api/medicines'),
           fetch('http://localhost:3000/api/orders/admin/all', { credentials: 'include' }),
+          fetch('http://localhost:3000/api/prescriptions/admin/stats', { credentials: 'include' }),
         ]);
-        const [meds, orders] = await Promise.all([medRes.json(), ordRes.json()]);
-        setStats({ totalMedicines: meds.length, totalOrders: orders.length, pendingOrders: orders.filter(o => o.status === 'Pending').length });
+        const [meds, orders, rx] = await Promise.all([medRes.json(), ordRes.json(), rxRes.json().catch(() => ({}))]);
+        setStats({
+          totalMedicines: meds.length,
+          totalOrders: orders.length,
+          pendingOrders: orders.filter(o => o.status === 'Pending').length,
+          pendingRx: rx.pending ?? 0,
+        });
       } catch { toast.error('Failed to load stats'); }
       finally { setLoading(false); }
     })();
@@ -50,10 +56,11 @@ const AdminDashboardPage = () => {
 
           {/* Quick actions */}
           <h2 style={{ fontWeight: 700, fontSize: '1rem', color: '#0f172a', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Quick Actions</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
             {[
               { to: '/admin/medicines', icon: '💊', title: 'Manage Medicines', desc: 'Add, edit or remove inventory', color: '#3b82f6', bg: '#eff6ff', border: '#bfdbfe' },
               { to: '/admin/orders',    icon: '📦', title: 'Manage Orders',    desc: 'Update statuses & check prescriptions', color: '#10b981', bg: '#f0fdf4', border: '#a7f3d0', badge: stats.pendingOrders > 0 ? `${stats.pendingOrders} pending` : null },
+              { to: '/admin/prescriptions', icon: '📋', title: 'Prescription uploads', desc: 'Verify Rx & mark medicine sent', color: '#d97706', bg: '#fffbeb', border: '#fde68a', badge: stats.pendingRx > 0 ? `${stats.pendingRx} pending` : null },
             ].map(a => (
               <Link key={a.to} to={a.to} className="card card-lift" style={{ padding: '1.5rem', textDecoration: 'none', display: 'block', background: a.bg, border: `1px solid ${a.border}` }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>

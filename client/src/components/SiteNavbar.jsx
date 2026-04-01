@@ -144,6 +144,13 @@ const SiteNavbar = () => {
               Products
             </Link>
             <Link
+              to="/prescriptions"
+              className="btn btn-secondary btn-sm"
+              style={{ borderRadius: 9999, padding: '0.45rem 0.9rem' }}
+            >
+              Upload Prescription
+            </Link>
+            <Link
               to="/cart"
               style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 40, borderRadius: 10, color: '#475569', transition: 'all .15s' }}
               onMouseEnter={(e) => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.color = '#10b981'; }}
@@ -172,6 +179,16 @@ const SiteNavbar = () => {
                 >
                   My Orders
                 </Link>
+                {user.role === 'user' && (
+                  <Link
+                    to="/prescriptions"
+                    style={{ fontSize: '0.875rem', fontWeight: 600, color: '#475569' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.color = '#10b981'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.color = '#475569'; }}
+                  >
+                    My Rx
+                  </Link>
+                )}
                 <button
                   type="button"
                   onClick={handleLogout}
@@ -285,6 +302,15 @@ const SiteNavbar = () => {
                 >
                   Products
                 </Link>
+                <Link
+                  to="/prescriptions"
+                  onClick={() => setMobileMenuOpen(false)}
+                  style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#475569', textDecoration: 'none', padding: '8px 0' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = '#10b981'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = '#475569'; }}
+                >
+                  Upload Prescription
+                </Link>
               </div>
 
               <div className="flex items-center justify-between">
@@ -302,8 +328,11 @@ const SiteNavbar = () => {
                   </div>
                 )}
                 {user && (
-                  <div className="flex gap-3">
+                  <div className="flex flex-wrap gap-3">
                     <Link to="/orders" onClick={() => setMobileMenuOpen(false)} style={{ fontSize: '0.875rem', fontWeight: 600, color: '#10b981', textDecoration: 'none' }}>My Orders</Link>
+                    {user.role === 'user' && (
+                      <Link to="/prescriptions" onClick={() => setMobileMenuOpen(false)} style={{ fontSize: '0.875rem', fontWeight: 600, color: '#10b981', textDecoration: 'none' }}>My Rx</Link>
+                    )}
                     <button type="button" onClick={handleLogout} style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>Logout</button>
                   </div>
                 )}

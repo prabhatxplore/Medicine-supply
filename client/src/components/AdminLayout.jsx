@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
@@ -12,13 +12,16 @@ const NAV_LINKS = [
   { to: '/admin/orders',    label: 'Orders',     icon: (
     <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
   )},
+  { to: '/admin/prescriptions', label: 'Prescriptions', icon: (
+    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+  )},
 ];
 
 /**
  * AdminLayout — shared layout for all admin pages.
  *
  * Props:
- *  active        {string}  — label of the current nav item ('Dashboard' | 'Medicines' | 'Orders')
+ *  active        {string}  — label of the current nav item ('Dashboard' | 'Medicines' | 'Orders' | 'Prescriptions')
  *  pageTitle     {string}  — h1 shown in the top bar
  *  pageSubtitle? {string}  — small subtitle below the h1
  *  pendingOrders?{number}  — shows a red badge on the Orders link
@@ -27,6 +30,21 @@ const NAV_LINKS = [
 const AdminLayout = ({ active, pageTitle, pageSubtitle, pendingOrders = 0, children }) => {
   const navigate  = useNavigate();
   const [open, setOpen] = useState(false);
+  const [pendingRx, setPendingRx] = useState(0);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch('http://localhost:3000/api/prescriptions/admin/stats', { credentials: 'include' });
+        if (res.ok) {
+          const d = await res.json();
+          setPendingRx(d.pending ?? 0);
+        }
+      } catch {
+        /* ignore */
+      }
+    })();
+  }, []);
 
   const logout = async () => {
     try {
@@ -75,6 +93,11 @@ const AdminLayout = ({ active, pageTitle, pageSubtitle, pendingOrders = 0, child
               {link.label === 'Orders' && pendingOrders > 0 && (
                 <span style={{ marginLeft: 'auto', background: '#ef4444', color: '#fff', fontSize: '0.6875rem', fontWeight: 700, borderRadius: 9999, minWidth: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 5px' }}>
                   {pendingOrders}
+                </span>
+              )}
+              {link.label === 'Prescriptions' && pendingRx > 0 && (
+                <span style={{ marginLeft: 'auto', background: '#f59e0b', color: '#fff', fontSize: '0.6875rem', fontWeight: 700, borderRadius: 9999, minWidth: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 5px' }}>
+                  {pendingRx}
                 </span>
               )}
             </Link>
