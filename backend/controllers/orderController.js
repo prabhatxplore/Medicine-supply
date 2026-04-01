@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Order = require("../models/Order");
 const Medicine = require("../models/Medicine");
+const User = require("../models/User");
 
 function normalizeOrderItems(raw) {
   let items = [];
@@ -30,6 +31,29 @@ function normalizeOrderItems(raw) {
   return normalized;
 }
 
+function parseDeliveryAddress(raw) {
+  if (raw == null || raw === "") return null;
+  let obj;
+  if (typeof raw === "string") {
+    try {
+      obj = JSON.parse(raw);
+    } catch {
+      return null;
+    }
+  } else if (typeof raw === "object") {
+    obj = raw;
+  } else {
+    return null;
+  }
+  const lat = Number(obj.lat);
+  const lng = Number(obj.lng);
+  const formattedAddress = String(obj.formattedAddress || "").trim();
+  if (!Number.isFinite(lat) || lat < -90 || lat > 90) return null;
+  if (!Number.isFinite(lng) || lng < -180 || lng > 180) return null;
+  if (!formattedAddress || formattedAddress.length > 500) return null;
+  return { formattedAddress, lat, lng };
+}
+
 exports.createOrder = async (req, res) => {
   if (!req.session.userId) {
     return res.status(401).json({ message: "Not authenticated" });
@@ -39,6 +63,11 @@ exports.createOrder = async (req, res) => {
     const items = normalizeOrderItems(req.body.items);
     if (!items) {
       return res.status(400).json({ message: "Invalid or empty cart items" });
+    }
+
+    const deliveryAddress = parseDeliveryAddress(req.body.deliveryAddress);
+    if (!deliveryAddress) {
+      return res.status(400).json({ message: "Please select a delivery address on the map" });
     }
 
     let totalAmount = 0;
@@ -105,6 +134,7 @@ exports.createOrder = async (req, res) => {
       items: orderItems,
       totalAmount,
       prescription: prescriptionPath,
+      deliveryAddress,
     });
 
     try {
@@ -114,6 +144,32 @@ exports.createOrder = async (req, res) => {
         await Medicine.findByIdAndUpdate(d.id, { $inc: { quantity: d.quantity } });
       }
       throw saveErr;
+    }
+
+    if (req.body.saveAddressForLater === "true" || req.body.saveAddressForLater === true) {
+      const label = String(req.body.addressLabel || "Address").trim().slice(0, 80);
+      try {
+        const user = await User.findById(req.session.userId);
+        if (user) {
+          const list = user.savedAddresses || [];
+          const dup = list.some(
+            (a) =>
+              Math.abs(a.lat - deliveryAddress.lat) < 1e-5 &&
+              Math.abs(a.lng - deliveryAddress.lng) < 1e-5
+          );
+          if (!dup && list.length < 25) {
+            user.savedAddresses.push({
+              label,
+              formattedAddress: deliveryAddress.formattedAddress,
+              lat: deliveryAddress.lat,
+              lng: deliveryAddress.lng,
+            });
+            await user.save();
+          }
+        }
+      } catch (saveAddrErr) {
+        console.error("saveAddressForLater error", saveAddrErr);
+      }
     }
 
     res.status(201).json({

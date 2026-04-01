@@ -48,6 +48,11 @@ const orderSchema = new mongoose.Schema(
       type: String, // file path if uploaded
       default: "",
     },
+    deliveryAddress: {
+      formattedAddress: { type: String, trim: true },
+      lat: { type: Number },
+      lng: { type: Number },
+    },
   },
   {
     timestamps: true,

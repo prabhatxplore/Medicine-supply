@@ -179,16 +179,7 @@ const SiteNavbar = () => {
                 >
                   My Orders
                 </Link>
-                {user.role === 'user' && (
-                  <Link
-                    to="/prescriptions"
-                    style={{ fontSize: '0.875rem', fontWeight: 600, color: '#475569' }}
-                    onMouseEnter={(e) => { e.currentTarget.style.color = '#10b981'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.color = '#475569'; }}
-                  >
-                    My Rx
-                  </Link>
-                )}
+                
                 <button
                   type="button"
                   onClick={handleLogout}

@@ -2,6 +2,8 @@ const express = require("express");
 const { body } = require("express-validator");
 const multer = require("multer");
 const authController = require("../controllers/authController");
+const addressController = require("../controllers/addressController");
+const geoController = require("../controllers/geoController");
 const { ensureAuth } = require("../middlewares/ensureAuth");
 const router = express.Router();
 
@@ -87,5 +89,12 @@ router.post(
 
 router.post("/logout", ensureAuth, authController.logout);
 router.get("/me", ensureAuth, authController.me);
+
+router.get("/addresses", ensureAuth, addressController.listAddresses);
+router.post("/addresses", ensureAuth, addressController.addAddress);
+router.delete("/addresses/:addressId", ensureAuth, addressController.deleteAddress);
+
+router.get("/geo/reverse", ensureAuth, geoController.reverse);
+router.get("/geo/search", ensureAuth, geoController.search);
 
 module.exports = router;

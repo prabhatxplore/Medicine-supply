@@ -125,6 +125,16 @@ const OrdersPage = () => {
                     {order.status !== 'Cancelled' && <OrderTimeline status={order.status} />}
                   </div>
 
+                  {order.deliveryAddress?.formattedAddress && (
+                    <div style={{ padding: '0.75rem 1.5rem', background: '#f0fdf4', borderBottom: '1px solid #dcfce7', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                      <span style={{ fontSize: 18, flexShrink: 0 }}>📍</span>
+                      <div>
+                        <p style={{ fontSize: '0.6875rem', fontWeight: 700, color: '#15803d', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Delivery address</p>
+                        <p style={{ fontSize: '0.875rem', color: '#14532d', margin: 0, lineHeight: 1.45 }}>{order.deliveryAddress.formattedAddress}</p>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Items */}
                   <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid #f1f5f9' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

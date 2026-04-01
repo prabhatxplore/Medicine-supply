@@ -172,7 +172,7 @@ const AdminMedicinesPage = () => {
               </div>
               <div style={{ gridColumn: 'span 2' }}>
                 <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#374151', marginBottom: 5 }}>Description</label>
-                <textarea name="description" placeholder="Brief description…" value={formData.description} onChange={handleChange} rows={2} className="input-field" style={{ resize: 'vertical' }} />
+                <textarea  name="description" placeholder="Brief description…" value={formData.description} onChange={handleChange} rows={2} className="input-field h-50" style={{ resize: 'vertical' }} />
               </div>
               <div>
                 <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#374151', marginBottom: 5 }}>Price (NPR) *</label>
