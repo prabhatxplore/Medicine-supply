@@ -19,6 +19,34 @@ const userSchema = new mongoose.Schema(
       required: true,
       minlength: 6,
     },
+    nationalIdCard: {
+      type: String, // file path
+      default: "",
+    },
+    citizenshipCard: {
+      type: String, // file path
+      default: "",
+    },
+    address: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    phoneNumber: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    status: {
+      type: String,
+      enum: ["unverified", "verified", "rejected"],
+      default: "unverified",
+    },
+    role: {
+      type: String,
+      enum: ["user", "admin"],
+      default: "user",
+    },
   },
   {
     timestamps: true,

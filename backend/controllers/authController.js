@@ -8,7 +8,7 @@ exports.signup = async (req, res) => {
     return res.status(422).json({ errors: errors.array() });
   }
 
-  const { name, email, password } = req.body;
+  const { name, email, password, address, phoneNumber } = req.body;
 
   try {
     const existingUser = await User.findOne({ email });
@@ -18,18 +18,40 @@ exports.signup = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    const newUser = new User({ name, email, password: hashedPassword });
+    const userData = {
+      name,
+      email,
+      password: hashedPassword,
+      address,
+      phoneNumber,
+      status: "unverified",
+      role: "user",
+    };
+
+    if (req.files.nationalIdCard && req.files.nationalIdCard[0]) {
+      userData.nationalIdCard = req.files.nationalIdCard[0].path;
+    }
+
+    if (req.files.citizenshipCard && req.files.citizenshipCard[0]) {
+      userData.citizenshipCard = req.files.citizenshipCard[0].path;
+    }
+
+    const newUser = new User(userData);
     await newUser.save();
 
     // set session after signup for immediate auth
     req.session.userId = newUser._id;
     req.session.email = newUser.email;
     req.session.isAuth = true;
+    req.session.status = newUser.status;
+    req.session.role = newUser.role;
 
     return res.status(201).json({
       message: "User created successfully",
       userId: newUser._id,
       email: newUser.email,
+      status: newUser.status,
+      role: newUser.role,
     });
   } catch (err) {
     console.error("signup error", err);
@@ -59,11 +81,14 @@ exports.login = async (req, res) => {
     req.session.userId = user._id;
     req.session.email = user.email;
     req.session.isAuth = true;
+    req.session.status = user.status;
+    req.session.role = user.role;
 
     return res.status(200).json({
       message: "Login successful",
       userId: user._id,
       email: user.email,
+      role: user.role,
     });
   } catch (err) {
     console.error("login error", err);
@@ -88,6 +113,8 @@ exports.me = (req, res) => {
       isAuth: true,
       userId: req.session.userId,
       email: req.session.email,
+      status: req.session.status,
+      role: req.session.role || "user",
     });
   }
 

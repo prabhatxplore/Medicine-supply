@@ -4,12 +4,17 @@ const express = require("express");
 const mongoose = require("mongoose");
 const session = require("express-session");
 const MongoStore = require("connect-mongo").default;
-const authRoutes = require("./routes/authRoutes");
-
+const cors = require("cors");
+const authRoutes = require("./routes/authRoutes");const medicineRoutes = require("./routes/medicineRoutes");
+const orderRoutes = require("./routes/orderRoutes");
 const app = express();
 
-app.use(express.json());
-app.use(
+app.use(cors({
+  origin: 'http://localhost:5173', // Vite dev server
+  credentials: true,
+}));
+
+app.use(express.json());app.use("/uploads", express.static("uploads"));app.use(
   session({
     secret: process.env.SESSION_SECRET || "keyboard cat",
     store: MongoStore.create({
@@ -21,13 +26,15 @@ app.use(
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: false,
       maxAge: 1000 * 60 * 60 * 24 * 3, // 3 days
     },
   }),
 );
 
 app.use("/api/auth", authRoutes);
+app.use("/api/medicines", medicineRoutes);
+app.use("/api/orders", orderRoutes);
 
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
