@@ -143,8 +143,8 @@ const AdminLayout = ({ active, pageTitle, pageSubtitle, pendingOrders = 0, child
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             {/* Hamburger (mobile only) */}
-            <button className="lg:hidden" onClick={() => setOpen(true)}
-              style={{ width: 36, height: 36, borderRadius: 9, border: '1px solid #e2e8f0', background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569' }}>
+            <button className="lg:hidden flex" onClick={() => setOpen(true)}
+              style={{ width: 36, height: 36, borderRadius: 9, border: '1px solid #e2e8f0', background: '#fff', cursor: 'pointer', alignItems: 'center', justifyContent: 'center', color: '#475569' }}>
               <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16M4 18h16" /></svg>
             </button>
             <div>

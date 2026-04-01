@@ -52,11 +52,18 @@ const HomePage = () => {
   }, []);
 
   useEffect(() => {
-    refreshCartCount();
-    const handler = () => refreshCartCount();
-    window.addEventListener("storage", handler);
-    return () => window.removeEventListener("storage", handler);
-  }, [refreshCartCount]);
+    // Only prevent scroll on mobile when menu is open
+    if (mobileMenuOpen && window.innerWidth < 1024) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    // Cleanup on unmount
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [mobileMenuOpen]);
 
   useEffect(() => {
     const init = async () => {
@@ -289,7 +296,11 @@ const HomePage = () => {
 
             {/* Mobile: cart + hamburger */}
             <div className="flex items-center gap-2 lg:hidden">
-              <Link to="/cart" style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", width: 38, height: 38, borderRadius: 10, color: "#475569" }}>
+              <Link
+                to="/cart"
+                onClick={() => setMobileMenuOpen(false)}
+                style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", width: 38, height: 38, borderRadius: 10, color: "#475569" }}
+              >
                 <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m1.6 8l-1 5h12M9 21a1 1 0 100-2 1 1 0 000 2zm10 0a1 1 0 100-2 1 1 0 000 2z" />
                 </svg>
@@ -300,6 +311,7 @@ const HomePage = () => {
                 )}
               </Link>
               <button
+                className="lg:hidden"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 aria-label="Toggle menu"
                 aria-expanded={mobileMenuOpen}
@@ -316,7 +328,30 @@ const HomePage = () => {
 
           {/* Mobile Menu */}
           {mobileMenuOpen && (
-            <div className="lg:hidden animate-fadeInDown" style={{ borderTop: "1px solid #e2e8f0", paddingBottom: "1rem", paddingTop: "1rem" }}>
+            <>
+              {/* Backdrop */}
+              <div
+                className="lg:hidden"
+                onClick={() => setMobileMenuOpen(false)}
+                style={{
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background: 'rgba(0, 0, 0, 0.5)',
+                  zIndex: 40,
+                  backdropFilter: 'blur(2px)'
+                }}
+              />
+              <div className="lg:hidden animate-fadeInDown" style={{
+                borderTop: "1px solid #e2e8f0",
+                paddingBottom: "1rem",
+                paddingTop: "1rem",
+                background: "#fff",
+                position: "relative",
+                zIndex: 50
+              }}>
               <form onSubmit={handleSearch} className="relative mb-4">
                 <svg style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "#94a3b8", width: 16, height: 16 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z" />
@@ -329,7 +364,28 @@ const HomePage = () => {
                   className="input-field"
                   style={{ paddingLeft: "2.5rem", borderRadius: 9999, background: "#f1f5f9", border: "2px solid transparent", fontSize: "0.9375rem" }}
                 />
+                <button
+                  type="submit"
+                  className="btn btn-primary btn-sm"
+                  style={{ position: "absolute", right: 4, top: "50%", transform: "translateY(-50%)", borderRadius: 9999 }}
+                >
+                  Search
+                </button>
               </form>
+
+              {/* Mobile Navigation Links */}
+              <div className="space-y-3 mb-4">
+                <Link
+                  to="/products"
+                  onClick={() => setMobileMenuOpen(false)}
+                  style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, color: "#475569", textDecoration: "none", padding: "8px 0" }}
+                  onMouseEnter={e => e.currentTarget.style.color = "#10b981"}
+                  onMouseLeave={e => e.currentTarget.style.color = "#475569"}
+                >
+                  Products
+                </Link>
+              </div>
+
               <div className="flex items-center justify-between">
                 {user ? (
                   <div className="flex items-center gap-3">
@@ -352,6 +408,7 @@ const HomePage = () => {
                 )}
               </div>
             </div>
+            </>
           )}
         </div>
       </header>
