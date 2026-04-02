@@ -13,7 +13,7 @@ const medicineRoutes = require("./routes/medicineRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const prescriptionRoutes = require("./routes/prescriptionRoutes");
 const app = express();
-
+app.set("trust proxy", 1); // ✅ add this line - required on Render!
 app.use(
   cors({
     origin: [
