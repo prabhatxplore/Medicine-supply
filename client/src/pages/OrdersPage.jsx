@@ -66,6 +66,15 @@ const OrdersPage = () => {
     })();
   }, []);
 
+  const sortedOrders = [...orders].sort((a, b) => {
+    const at = new Date(a?.createdAt ?? 0).getTime();
+    const bt = new Date(b?.createdAt ?? 0).getTime();
+    if (!Number.isFinite(at) && !Number.isFinite(bt)) return 0;
+    if (!Number.isFinite(at)) return 1;
+    if (!Number.isFinite(bt)) return -1;
+    return bt - at;
+  });
+
   if (loading) return (
     <div className="flex-1 flex items-center justify-center min-h-[40vh]" style={{ fontFamily: "'Inter', sans-serif" }}>
       <div style={{ textAlign: 'center' }}>
@@ -85,7 +94,7 @@ const OrdersPage = () => {
           </p>
         </div>
 
-        {orders.length === 0 ? (
+        {sortedOrders.length === 0 ? (
           <div className="card animate-scaleIn" style={{ padding: '5rem 2rem', textAlign: 'center' }}>
             <div style={{ fontSize: 72, marginBottom: 20 }}>📦</div>
             <h2 style={{ fontWeight: 800, fontSize: '1.5rem', color: '#0f172a', marginBottom: 10 }}>No orders yet</h2>
@@ -94,7 +103,7 @@ const OrdersPage = () => {
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {orders.map((order, idx) => {
+            {sortedOrders.map((order, idx) => {
               const statusCfg = STATUS_CONFIG[order.status] || STATUS_CONFIG.Pending;
               const isExpanded = expandedId === order._id;
               return (

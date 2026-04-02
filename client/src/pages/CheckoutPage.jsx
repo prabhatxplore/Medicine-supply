@@ -206,13 +206,15 @@ const CheckoutPage = () => {
                   <div style={{ marginBottom: '1rem' }}>
                     <h3 style={{ fontWeight: 800, fontSize: '1.0625rem', color: '#0f172a', margin: '0 0 4px' }}>Delivery address</h3>
                     <p style={{ fontSize: '0.875rem', color: '#64748b', margin: 0 }}>
-                      Search for a place or tap the map to set where we deliver. Saved addresses can be reused anytime.
+                      Tap the map or pick a saved place.
                     </p>
                   </div>
 
                   {savedAddresses.length > 0 && (
                     <div style={{ marginBottom: 12 }}>
-                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Saved addresses</label>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: 6 }}>
+                        Saved
+                      </label>
                       <select
                         value={selectedSavedId}
                         onChange={handleSelectSaved}
@@ -267,8 +269,9 @@ const CheckoutPage = () => {
 
                   {deliveryAddress && (
                     <div style={{ marginTop: 12, padding: '12px 14px', background: '#f0fdf4', borderRadius: 10, border: '1px solid #bbf7d0' }}>
-                      <p style={{ fontSize: '0.6875rem', fontWeight: 700, color: '#15803d', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Selected</p>
-                      <p style={{ fontSize: '0.875rem', color: '#14532d', margin: 0, lineHeight: 1.45 }}>{deliveryAddress.formattedAddress}</p>
+                      <p style={{ fontSize: '0.875rem', color: '#14532d', margin: 0, lineHeight: 1.35 }}>
+                        Delivery: {deliveryAddress.formattedAddress.length > 95 ? `${deliveryAddress.formattedAddress.slice(0, 95)}…` : deliveryAddress.formattedAddress}
+                      </p>
                     </div>
                   )}
 

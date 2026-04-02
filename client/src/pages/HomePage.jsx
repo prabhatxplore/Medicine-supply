@@ -7,11 +7,11 @@ import PrescriptionUploadSection from "../components/PrescriptionUploadSection";
 
 /* ── Category config with unique icons ── */
 const CATEGORIES = [
-  { name: "All",         icon: "🏥", color: "from-emerald-500 to-teal-500" },
-  { name: "Pain Relief", icon: "💊", color: "from-red-400 to-orange-400" },
-  { name: "Cold & Cough",icon: "🤧", color: "from-blue-400 to-cyan-400" },
-  { name: "Vitamins",    icon: "🌿", color: "from-green-400 to-emerald-500" },
-  { name: "Antibiotics", icon: "🧬", color: "from-purple-400 to-violet-500" },
+  { name: "All",          icon: "🏥", from: "#10b981", to: "#0d9488" },
+  { name: "Pain Relief", icon: "💊", from: "#ef4444", to: "#f97316" },
+  { name: "Cold & Cough", icon: "🤧", from: "#3b82f6", to: "#06b6d4" },
+  { name: "Vitamins",     icon: "🌿", from: "#22c55e", to: "#10b981" },
+  { name: "Antibiotics",  icon: "🧬", from: "#8b5cf6", to: "#7c3aed" },
 ];
 
 /* ── Skeleton card ── */
@@ -268,19 +268,28 @@ const HomePage = () => {
                     gap: 8,
                     padding: "1rem 1.25rem",
                     borderRadius: 16,
-                    border: "none",
+                    border: isActive ? "1px solid rgba(255,255,255,.18)" : "1px solid #e2e8f0",
                     cursor: "pointer",
                     transition: "all .25s cubic-bezier(.16,1,.3,1)",
                     fontFamily: "inherit",
-                    background: isActive ? `linear-gradient(135deg, ${cat.color.replace("from-", "").replace(" to-", ",")} )` : "#fff",
-                    ...(isActive ? {} : { border: "2px solid #e2e8f0" }),
-                    transform: isActive ? "translateY(-3px) scale(1.05)" : "none",
-                    boxShadow: isActive ? "0 8px 24px rgba(0,0,0,.12)" : "0 2px 6px rgba(0,0,0,.05)",
+                    background: isActive ? `linear-gradient(135deg, ${cat.from}, ${cat.to})` : "#fff",
+                    transform: isActive ? "translateY(-2px) scale(1.02)" : "none",
+                    boxShadow: isActive ? "0 10px 26px rgba(16,185,129,.22)" : "0 2px 10px rgba(15,23,42,.06)",
                     minWidth: 90,
                   }}
                 >
                   <span style={{ fontSize: 28 }}>{cat.icon}</span>
-                  <span style={{ fontSize: "0.8125rem", fontWeight: 700, color: isActive ? "#fff" : "#374151", whiteSpace: "nowrap" }}>{cat.name}</span>
+                  <span
+                    style={{
+                      fontSize: "0.875rem",
+                      fontWeight: 800,
+                      color: isActive ? "#fff" : "#0f172a",
+                      whiteSpace: "nowrap",
+                      letterSpacing: "0.01em",
+                    }}
+                  >
+                    {cat.name}
+                  </span>
                 </button>
               );
             })}

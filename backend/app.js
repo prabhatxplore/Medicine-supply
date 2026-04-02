@@ -1,9 +1,12 @@
 require("dotenv").config();
 
+const dns = require("dns");
+dns.setServers(["8.8.8.8", "8.8.4.4", "1.1.1.1"]);
+
 const express = require("express");
 const mongoose = require("mongoose");
 const session = require("express-session");
-const MongoStore = require("connect-mongo").default;
+const { MongoStore } = require("connect-mongo");
 const cors = require("cors");
 const authRoutes = require("./routes/authRoutes");
 const medicineRoutes = require("./routes/medicineRoutes");
@@ -11,10 +14,16 @@ const orderRoutes = require("./routes/orderRoutes");
 const prescriptionRoutes = require("./routes/prescriptionRoutes");
 const app = express();
 
-app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000'], // Vite dev server(s) and backend host
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "http://localhost:3000",
+    ], // Vite dev server(s) and backend host
+    credentials: true,
+  }),
+);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -23,7 +32,7 @@ app.use(
   session({
     secret: process.env.SESSION_SECRET || "keyboard cat",
     store: MongoStore.create({
-      mongoUrl: process.env.MONGO_URL || "mongodb://localhost:27017/Medicine",
+      mongoUrl: process.env.MONGO_URI,
       collectionName: "sessions",
       ttl: 60 * 60 * 24 * 3, // 3 days
     }),
@@ -46,17 +55,37 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
-const MONGO_URL = process.env.MONGO_URL || "mongodb://localhost:27017/Medicine";
+const MONGO_URI = process.env.MONGO_URI;
+
+if (!MONGO_URI) {
+  console.error("❌ MONGO_URI is not defined in .env file");
+  process.exit(1);
+}
+
+console.log("🔄 Connecting to MongoDB Atlas...");
 
 mongoose
-  .connect(MONGO_URL)
+  .connect(MONGO_URI, {
+    serverSelectionTimeoutMS: 10000, // 10 seconds
+    socketTimeoutMS: 45000,
+    family: 4, // Force IPv4 — fixes most ECONNREFUSED/SRV issues
+  })
   .then(() => {
-    console.log("Connected to MongoDB");
+    console.log("✅ Connected to MongoDB Atlas");
     app.listen(3000, () => {
-      console.log(`server is listening on http://localhost:3000`);
+      console.log(`🚀 Server is listening on http://localhost:3000`);
     });
   })
   .catch((err) => {
-    console.error("Error connecting to MongoDB:", err);
+    console.error("❌ Error connecting to MongoDB Atlas:");
+    console.error("   Code:", err.code);
+    console.error("   Message:", err.message);
+    if (err.code === "ECONNREFUSED" || err.code === "ETIMEOUT") {
+      console.error("\n📋 Troubleshooting steps:");
+      console.error("   1. Go to https://cloud.mongodb.com → Network Access");
+      console.error("   2. Click 'Add IP Address' → 'Allow Access from Anywhere' (0.0.0.0/0)");
+      console.error("   3. Wait ~30 seconds and restart the server");
+      console.error("   4. Also check your internet/VPN connection\n");
+    }
     process.exit(1);
   });
