@@ -178,7 +178,7 @@ const MyPrescriptionsPage = () => {
                 ) : null}
                 {r.prescriptionFile ? (
                   <a
-                    href={`http://localhost:3000/${r.prescriptionFile}`}
+                    href={r.prescriptionFile.startsWith('http') ? r.prescriptionFile : `http://localhost:3000/${r.prescriptionFile}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-sm font-semibold text-emerald-700 hover:underline"

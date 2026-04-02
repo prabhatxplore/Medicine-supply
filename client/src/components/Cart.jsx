@@ -41,7 +41,7 @@ const Cart = () => {
                 <div className="flex items-center space-x-4">
                   {item.image && (
                     <img
-                      src={`http://localhost:3000/${item.image}`}
+                      src={item.image.startsWith('http') ? item.image : `http://localhost:3000/${item.image}`}
                       alt={item.name}
                       className="w-16 h-16 object-cover rounded"
                     />

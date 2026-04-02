@@ -177,9 +177,13 @@ const OrdersPage = () => {
                       </div>
                       {order.prescription && (
                         <button
-                          onClick={() => window.open(`http://localhost:3000/${order.prescription}`, '_blank')}
-                          className="btn btn-sm"
-                          style={{ background: '#3b82f6', color: '#fff', border: 'none', borderRadius: 8 }}
+                          onClick={() => window.open(order.prescription.startsWith('http') ? order.prescription : `http://localhost:3000/${order.prescription}`, '_blank')}
+                          className="btn"
+                          style={{
+                            flex: 1,
+                            padding: '10px',
+                            background: '#3b82f6', color: '#fff', border: 'none', borderRadius: 8
+                          }}
                         >
                           View Prescription
                         </button>

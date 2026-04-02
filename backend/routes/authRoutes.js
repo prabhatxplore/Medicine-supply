@@ -6,34 +6,12 @@ const addressController = require("../controllers/addressController");
 const geoController = require("../controllers/geoController");
 const { ensureAuth } = require("../middlewares/ensureAuth");
 const ensureAdmin = require("../middlewares/ensureAdmin");
+const { createStorage } = require("../config/cloudinary");
 const router = express.Router();
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/");
-  },
-  filename: (req, file, cb) => {
-    // ensure JPG extension for all uploaded files
-    const timestamp = Date.now();
-    const fieldName = file.fieldname.replace(/[^a-zA-Z0-9]/g, "");
-    cb(null, `${timestamp}-${fieldName}.jpg`);
-  },
-});
-
 const upload = multer({
-  storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
-  fileFilter: (req, file, cb) => {
-    if (file.mimetype === "image/jpeg" || file.mimetype === "image/jpg") {
-      cb(null, true);
-    } else {
-      cb(
-        new Error(
-          "Only JPG images are allowed for nationalIdCard and citizenshipCard",
-        ),
-      );
-    }
-  },
+  storage: createStorage("users"),
+  limits: { fileSize: 5 * 1024 * 1024 },
 });
 
 router.post(

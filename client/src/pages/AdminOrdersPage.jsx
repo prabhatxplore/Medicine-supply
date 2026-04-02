@@ -135,7 +135,7 @@ const AdminOrdersPage = () => {
                     <p style={{ fontSize: '0.6875rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 5px' }}>Rx</p>
                     {rx ? (
                       order.prescription ? (
-                        <button onClick={() => window.open(`http://localhost:3000/${order.prescription}`, '_blank')}
+                        <button onClick={() => window.open(order.prescription.startsWith('http') ? order.prescription : `http://localhost:3000/${order.prescription}`, '_blank')}
                           style={{ display: 'flex', alignItems: 'center', gap: 5, background: '#f0fdf4', color: '#15803d', border: '1px solid #bbf7d0', borderRadius: 7, padding: '4px 9px', cursor: 'pointer', fontFamily: 'inherit', fontSize: '0.75rem', fontWeight: 700 }}>
                           👁 View
                         </button>

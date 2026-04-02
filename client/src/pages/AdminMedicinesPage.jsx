@@ -76,7 +76,7 @@ const AdminMedicinesPage = () => {
       categories: Array.isArray(med.categories) ? [...med.categories] : [],
     });
     setImage(null);
-    setImagePreview(med.image ? `http://localhost:3000/${med.image}` : null);
+    setImagePreview(med.image ? (med.image.startsWith('http') ? med.image : `http://localhost:3000/${med.image}`) : null);
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -291,7 +291,7 @@ const AdminMedicinesPage = () => {
               <div key={med._id} className="card card-lift" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                 <div style={{ height: 150, background: 'linear-gradient(135deg,#ecfdf5,#f0fdfa)', position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
                   {med.image ? (
-                    <img src={`http://localhost:3000/${med.image}`} alt={med.name} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .35s' }}
+                    <img src={med.image.startsWith('http') ? med.image : `http://localhost:3000/${med.image}`} alt={med.name} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .35s' }}
                       onMouseEnter={e => e.target.style.transform = 'scale(1.07)'}
                       onMouseLeave={e => e.target.style.transform = 'scale(1)'} />
                   ) : (

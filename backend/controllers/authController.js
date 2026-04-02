@@ -107,15 +107,31 @@ exports.logout = (req, res) => {
   });
 };
 
-exports.me = (req, res) => {
+exports.me = async (req, res) => {
   if (req.session && req.session.isAuth) {
-    return res.json({
-      isAuth: true,
-      userId: req.session.userId,
-      email: req.session.email,
-      status: req.session.status,
-      role: req.session.role || "user",
-    });
+    try {
+      const user = await User.findById(req.session.userId).select("name email status role").lean();
+      if (!user) {
+        req.session.destroy(() => {});
+        return res.status(401).json({ message: "Account no longer exists" });
+      }
+
+      // Sync session with latest DB values
+      req.session.status = user.status;
+      req.session.role = user.role;
+
+      return res.json({
+        isAuth: true,
+        userId: req.session.userId,
+        name: user.name,
+        email: user.email,
+        status: user.status,
+        role: user.role,
+      });
+    } catch (err) {
+      console.error("me error", err);
+      return res.status(500).json({ message: "Server error" });
+    }
   }
 
   return res.status(401).json({ message: "Not authenticated" });

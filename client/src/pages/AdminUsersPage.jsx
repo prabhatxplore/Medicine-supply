@@ -108,12 +108,12 @@ const AdminUsersPage = () => {
                         {u.nationalIdCard || u.citizenshipCard ? (
                           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                             {u.nationalIdCard && (
-                              <a href={`http://localhost:3000/${u.nationalIdCard}`} target="_blank" rel="noreferrer" style={{ fontSize: '0.8125rem', color: '#3b82f6', textDecoration: 'none', fontWeight: 600 }}>
+                              <a href={u.nationalIdCard.startsWith('http') ? u.nationalIdCard : `http://localhost:3000/${u.nationalIdCard}`} target="_blank" rel="noreferrer" style={{ fontSize: '0.8125rem', color: '#3b82f6', textDecoration: 'none', fontWeight: 600 }}>
                                 📄 View National ID
                               </a>
                             )}
                             {u.citizenshipCard && (
-                              <a href={`http://localhost:3000/${u.citizenshipCard}`} target="_blank" rel="noreferrer" style={{ fontSize: '0.8125rem', color: '#3b82f6', textDecoration: 'none', fontWeight: 600 }}>
+                              <a href={u.citizenshipCard.startsWith('http') ? u.citizenshipCard : `http://localhost:3000/${u.citizenshipCard}`} target="_blank" rel="noreferrer" style={{ fontSize: '0.8125rem', color: '#3b82f6', textDecoration: 'none', fontWeight: 600 }}>
                                 📄 View Citizenship
                               </a>
                             )}

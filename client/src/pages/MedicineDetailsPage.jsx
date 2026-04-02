@@ -84,17 +84,13 @@ const MedicineDetailsPage = () => {
           <div className="animate-fadeInUp">
             <div
               onClick={() => setImageZoomed(!imageZoomed)}
-              style={{
-                borderRadius: 20, overflow: 'hidden', position: 'relative', cursor: 'zoom-in',
-                background: 'linear-gradient(135deg,#ecfdf5,#f0fdfa)', aspectRatio: '1/1', maxHeight: 480,
-                boxShadow: '0 8px 32px rgba(0,0,0,.08)',
-              }}
+              className="aspect-square bg-slate-50 md:rounded-l-2xl flex items-center justify-center p-8 lg:p-12 border-b md:border-b-0 md:border-r border-slate-200"
             >
               {medicine.image ? (
                 <img
-                  src={`http://localhost:3000/${medicine.image}`}
+                  src={medicine.image.startsWith('http') ? medicine.image : `http://localhost:3000/${medicine.image}`}
                   alt={medicine.name}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .4s ease', transform: imageZoomed ? 'scale(1.15)' : 'scale(1)' }}
+                  className="w-full h-full object-contain filter drop-shadow-xl scale-100 hover:scale-105 transition-transform duration-500"
                 />
               ) : (
                 <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 96 }}>💊</div>

@@ -109,7 +109,9 @@ const AdminPrescriptionsPage = () => {
     }
   };
 
-  const fileUrl = selected?.prescriptionFile ? `http://localhost:3000/${selected.prescriptionFile}` : null;
+  const fileUrl = selected?.prescriptionFile 
+    ? (selected.prescriptionFile.startsWith('http') ? selected.prescriptionFile : `http://localhost:3000/${selected.prescriptionFile}`)
+    : null;
   const isPdf = fileUrl && selected.prescriptionFile.toLowerCase().endsWith('.pdf');
 
   return (

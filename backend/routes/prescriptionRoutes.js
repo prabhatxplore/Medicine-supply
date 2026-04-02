@@ -3,33 +3,13 @@ const multer = require("multer");
 const prescriptionController = require("../controllers/prescriptionController");
 const { ensureAuth } = require("../middlewares/ensureAuth");
 const ensureAdmin = require("../middlewares/ensureAdmin");
-
-const path = require("path");
+const { createStorage } = require("../config/cloudinary");
 
 const router = express.Router();
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/");
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const ext = path.extname(file.originalname) || '';
-    cb(null, file.fieldname + '-' + uniqueSuffix + ext);
-  }
-});
-
 const upload = multer({
-  storage: storage,
+  storage: createStorage("prescriptions"),
   limits: { fileSize: 5 * 1024 * 1024 },
-  fileFilter: (req, file, cb) => {
-    const allowed = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
-    if (allowed.includes(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(new Error("Only JPEG, PNG, WebP or PDF allowed"));
-    }
-  },
 });
 
 const ensureCustomer = (req, res, next) => {

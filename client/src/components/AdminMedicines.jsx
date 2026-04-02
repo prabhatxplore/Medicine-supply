@@ -182,7 +182,7 @@ const AdminMedicines = () => {
             <div key={medicine._id} className="bg-white p-6 rounded-lg shadow-md">
               {medicine.image && (
                 <img
-                  src={`http://localhost:3000/${medicine.image}`}
+                  src={medicine.image.startsWith('http') ? medicine.image : `http://localhost:3000/${medicine.image}`}
                   alt={medicine.name}
                   className="w-full h-40 object-cover mb-4 rounded"
                 />

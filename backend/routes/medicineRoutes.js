@@ -3,18 +3,12 @@ const multer = require("multer");
 const medicineController = require("../controllers/medicineController");
 const { ensureAuth } = require("../middlewares/ensureAuth");
 const ensureAdmin = require("../middlewares/ensureAdmin");
+const { createStorage } = require("../config/cloudinary");
 const router = express.Router();
 
 const upload = multer({
-  dest: "uploads/",
+  storage: createStorage("medicines"),
   limits: { fileSize: 5 * 1024 * 1024 },
-  fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith("image/")) {
-      cb(null, true);
-    } else {
-      cb(new Error("Only image files are allowed"));
-    }
-  },
 });
 
 router.get("/", medicineController.getAllMedicines);

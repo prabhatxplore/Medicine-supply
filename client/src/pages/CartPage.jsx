@@ -62,9 +62,9 @@ const CartPage = () => {
                 <div key={item._id} className="card animate-fadeInUp" style={{ padding: '1.25rem', animationDelay: `${idx * 60}ms` }}>
                   <div className="flex gap-4 items-start" style={{ flexWrap: 'wrap' }}>
                     {/* Image */}
-                    <div style={{ width: 80, height: 80, borderRadius: 12, overflow: 'hidden', background: 'linear-gradient(135deg,#ecfdf5,#f0fdfa)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ width: 68, height: 68, borderRadius: 10, background: '#f8fafc', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
                       {item.image ? (
-                        <img src={`http://localhost:3000/${item.image}`} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <img src={item.image.startsWith('http') ? item.image : `http://localhost:3000/${item.image}`} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       ) : (
                         <span style={{ fontSize: 36 }}>💊</span>
                       )}
