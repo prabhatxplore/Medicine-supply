@@ -20,7 +20,7 @@ app.use(
       "http://localhost:5173",
       "http://localhost:5174",
       "http://localhost:3000",
-      "https://medicine-supply.vercel.app",
+      "https://medicine-supply-ecru.vercel.app",
     ], // Vite dev server(s) and backend host
     credentials: true,
   }),
