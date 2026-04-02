@@ -468,7 +468,7 @@ const HomePage = () => {
             <div>
               <h4 style={{ fontWeight: 700, color: "#fff", marginBottom: 14, fontSize: "0.9375rem" }}>Contact</h4>
               <div style={{ display: "flex", flexDirection: "column", gap: 8, fontSize: "0.875rem" }}>
-                <p style={{ margin: 0, color: "#64748b" }}>📍 Kathmandu, Nepal</p>
+                <p style={{ margin: 0, color: "#64748b" }}>📍 Pokhara, Nepal</p>
                 <p style={{ margin: 0, color: "#64748b" }}>📞 +977-1-234-5678</p>
                 <p style={{ margin: 0, color: "#64748b" }}>✉️ hello@pharmacare.np</p>
               </div>
