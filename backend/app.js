@@ -20,6 +20,7 @@ app.use(
       "http://localhost:5173",
       "http://localhost:5174",
       "http://localhost:3000",
+      "https://medicine-supply.vercel.app",
     ], // Vite dev server(s) and backend host
     credentials: true,
   }),
@@ -84,7 +85,9 @@ mongoose
     if (err.code === "ECONNREFUSED" || err.code === "ETIMEOUT") {
       console.error("\n📋 Troubleshooting steps:");
       console.error("   1. Go to https://cloud.mongodb.com → Network Access");
-      console.error("   2. Click 'Add IP Address' → 'Allow Access from Anywhere' (0.0.0.0/0)");
+      console.error(
+        "   2. Click 'Add IP Address' → 'Allow Access from Anywhere' (0.0.0.0/0)",
+      );
       console.error("   3. Wait ~30 seconds and restart the server");
       console.error("   4. Also check your internet/VPN connection\n");
     }
