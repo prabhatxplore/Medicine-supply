@@ -63,7 +63,7 @@ if (!MONGO_URI) {
 }
 
 console.log("🔄 Connecting to MongoDB Atlas...");
-
+const PORT = process.env.PORT || 3000;
 mongoose
   .connect(MONGO_URI, {
     serverSelectionTimeoutMS: 10000, // 10 seconds
@@ -73,8 +73,8 @@ mongoose
   .then(() => {
     console.log("✅ Connected to MongoDB Atlas");
     console.log("Mongo database:", mongoose.connection?.name || "unknown");
-    app.listen(3000, () => {
-      console.log(`🚀 Server is listening on http://localhost:3000`);
+    app.listen(PORT, () => {
+      console.log(`🚀 Server is listening on port ${PORT}`);
     });
   })
   .catch((err) => {
