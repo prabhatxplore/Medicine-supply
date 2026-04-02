@@ -10,8 +10,7 @@ const LoginPage = () => {
 
   const getDashboardPath = (role) => {
     if (role === 'admin') return '/admin';
-    if (role === 'volunteer') return '/volunteer';
-    return '/orders';
+    return '/';
   };
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
