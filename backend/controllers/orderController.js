@@ -60,6 +60,14 @@ exports.createOrder = async (req, res) => {
   }
 
   try {
+    const user = await User.findById(req.session.userId).lean();
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    if (user.status !== "verified") {
+      return res.status(403).json({ message: "Your account is not verified. Please wait for an admin to verify your documents." });
+    }
+
     const items = normalizeOrderItems(req.body.items);
     if (!items) {
       return res.status(400).json({ message: "Invalid or empty cart items" });

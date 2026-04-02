@@ -147,12 +147,12 @@ const AdminOrdersPage = () => {
                   <div>
                     <p style={{ fontSize: '0.6875rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 5px' }}>Status</p>
                     <div style={{ position: 'relative', display: 'inline-block' }}>
-                      <select value={order.status} disabled={isUpdating}
+                      <select value={order.status} disabled={isUpdating || order.status === 'Delivered' || order.status === 'Cancelled'}
                         onChange={e => updateStatus(order._id, e.target.value)}
-                        style={{ appearance: 'none', WebkitAppearance: 'none', padding: '5px 26px 5px 9px', borderRadius: 8, border: `1.5px solid ${cfg.dot}`, background: cfg.bg, color: cfg.color, fontWeight: 700, fontSize: '0.8125rem', cursor: 'pointer', fontFamily: 'inherit', outline: 'none', opacity: isUpdating ? 0.5 : 1, transition: 'all .15s' }}>
-                        {['Pending', 'Processed', 'Delivered'].map(s => <option key={s} value={s}>{s}</option>)}
+                        style={{ appearance: 'none', WebkitAppearance: 'none', padding: '5px 26px 5px 9px', borderRadius: 8, border: `1.5px solid ${cfg.dot}`, background: cfg.bg, color: cfg.color, fontWeight: 700, fontSize: '0.8125rem', cursor: order.status === 'Delivered' || order.status === 'Cancelled' ? 'default' : 'pointer', fontFamily: 'inherit', outline: 'none', opacity: (isUpdating || order.status === 'Delivered' || order.status === 'Cancelled') ? 0.6 : 1, transition: 'all .15s' }}>
+                        {['Pending', 'Processed', 'Delivered', 'Cancelled'].map(s => <option key={s} value={s} disabled={order.status === 'Pending' && (s === 'Delivered' || s === 'Cancelled') ? false : (order.status === 'Processed' && s === 'Pending') ? true : false}>{s}</option>)}
                       </select>
-                      <svg style={{ position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: cfg.color }} width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg style={{ position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: cfg.color, opacity: order.status === 'Delivered' || order.status === 'Cancelled' ? 0.6 : 1 }} width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
                       </svg>
                     </div>

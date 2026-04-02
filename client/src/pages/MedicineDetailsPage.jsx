@@ -238,7 +238,7 @@ const MedicineDetailsPage = () => {
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {[
-                ['⚡', 'Express delivery in ~30 minutes'],
+                ['⚡', 'Express delivery in ~24 hours'],
                 ['💸', 'Free delivery on orders above NPR 100'],
                 ['📍', 'Real-time order tracking available'],
                 ['↩️', 'Easy returns within 7 days if sealed'],

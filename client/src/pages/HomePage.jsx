@@ -163,7 +163,7 @@ const HomePage = () => {
             <div className="animate-fadeInUp">
               <div className="inline-flex items-center gap-2 mb-5" style={{ background: "rgba(16,185,129,.1)", border: "1px solid rgba(16,185,129,.2)", borderRadius: 9999, padding: "6px 14px" }}>
                 <span style={{ width: 8, height: 8, background: "#10b981", borderRadius: "50%", display: "inline-block", animation: "pulse-ring 2s infinite" }} />
-                <span style={{ fontSize: "0.8125rem", fontWeight: 600, color: "#059669" }}>30-Minute Delivery Available</span>
+                <span style={{ fontSize: "0.8125rem", fontWeight: 600, color: "#059669" }}>24-Hour Delivery Available</span>
               </div>
               <h1 style={{ fontSize: "clamp(2.25rem, 5vw, 3.5rem)", fontWeight: 900, color: "#0f172a", lineHeight: 1.1, marginBottom: "1.25rem", letterSpacing: "-0.03em" }}>
                 Your Health Deserves{" "}
@@ -184,7 +184,7 @@ const HomePage = () => {
 
               {/* Stats */}
               <div className="flex flex-wrap gap-6 mt-10 stagger-children">
-                {[["10K+", "Happy Customers"], ["30min", "Avg Delivery"], ["100%", "Genuine Meds"]].map(([val, lbl]) => (
+                {[["10K+", "Happy Customers"], ["24hrs", "Avg Delivery"], ["100%", "Genuine Meds"]].map(([val, lbl]) => (
                   <div key={lbl} className="animate-fadeInUp">
                     <p style={{ fontSize: "1.625rem", fontWeight: 800, color: "#0f172a", lineHeight: 1 }}>{val}</p>
                     <p style={{ fontSize: "0.8125rem", color: "#64748b", marginTop: 3 }}>{lbl}</p>
@@ -204,7 +204,7 @@ const HomePage = () => {
                   <span style={{ fontSize: 20 }}>🚚</span>
                   <div>
                     <p style={{ fontSize: "0.75rem", fontWeight: 700, color: "#0f172a", margin: 0 }}>Fast Delivery</p>
-                    <p style={{ fontSize: "0.6875rem", color: "#94a3b8", margin: 0 }}>~30 minutes</p>
+                    <p style={{ fontSize: "0.6875rem", color: "#94a3b8", margin: 0 }}>~24 hours</p>
                   </div>
                 </div>
                 <div className="animate-scaleIn card" style={{ position: "absolute", bottom: 20, left: -30, padding: "10px 16px", display: "flex", alignItems: "center", gap: 8, animationDelay: "0.5s" }}>
@@ -226,7 +226,7 @@ const HomePage = () => {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 stagger-children">
             {[
               { icon: "✅", title: "100% Genuine", desc: "All products certified", color: "#10b981", bg: "#f0fdf4" },
-              { icon: "⚡", title: "Fast Delivery", desc: "30 mins average", color: "#f59e0b", bg: "#fffbeb" },
+              { icon: "⚡", title: "Fast Delivery", desc: "24 hrs average", color: "#f59e0b", bg: "#fffbeb" },
               { icon: "🔒", title: "Secure Payment", desc: "Encrypted & safe", color: "#3b82f6", bg: "#eff6ff" },
               { icon: "💬", title: "24/7 Support", desc: "Always here for you", color: "#8b5cf6", bg: "#f5f3ff" },
             ].map((b) => (
@@ -355,7 +355,7 @@ const HomePage = () => {
               { num: "01", emoji: "🔍", title: "Search", desc: "Find your medicines easily" },
               { num: "02", emoji: "🛒", title: "Add to Cart", desc: "Select quantity & add" },
               { num: "03", emoji: "📋", title: "Checkout", desc: "Place your order securely" },
-              { num: "04", emoji: "🚚", title: "Delivery", desc: "Delivered in ~30 minutes" },
+              { num: "04", emoji: "🚚", title: "Delivery", desc: "Delivered in ~24 hours" },
             ].map((step, i) => (
               <div key={i} className="animate-fadeInUp" style={{ textAlign: "center" }}>
                 <div style={{ position: "relative", display: "inline-flex", marginBottom: 16 }}>

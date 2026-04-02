@@ -88,7 +88,7 @@ const LoginPage = () => {
           {/* Feature pills */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {[
-              { icon: '⚡', text: '30-minute delivery guarantee' },
+              { icon: '⚡', text: '24-hour delivery guarantee' },
               { icon: '✅', text: '100% genuine certified products' },
               { icon: '🔒', text: 'Secure & encrypted payments' },
               { icon: '💬', text: '24/7 dedicated support' },

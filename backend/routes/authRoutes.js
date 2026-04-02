@@ -5,6 +5,7 @@ const authController = require("../controllers/authController");
 const addressController = require("../controllers/addressController");
 const geoController = require("../controllers/geoController");
 const { ensureAuth } = require("../middlewares/ensureAuth");
+const ensureAdmin = require("../middlewares/ensureAdmin");
 const router = express.Router();
 
 const storage = multer.diskStorage({
@@ -96,5 +97,9 @@ router.delete("/addresses/:addressId", ensureAuth, addressController.deleteAddre
 
 router.get("/geo/reverse", ensureAuth, geoController.reverse);
 router.get("/geo/search", ensureAuth, geoController.search);
+
+// Admin Routes
+router.get("/admin/users", ensureAuth, ensureAdmin, authController.getAllUsers);
+router.put("/admin/users/:id/status", ensureAuth, ensureAdmin, authController.updateUserStatus);
 
 module.exports = router;

@@ -16,6 +16,11 @@ const SignupPage = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  const getDashboardPath = (role) => {
+    if (role === 'admin') return '/admin';
+    return '/';
+  };
+
   const passwordStrength = (pwd) => {
     let score = 0;
     if (pwd.length >= 6) score++;
@@ -50,11 +55,15 @@ const SignupPage = () => {
     const data = new FormData();
     Object.keys(formData).forEach(k => { if (formData[k]) data.append(k, formData[k]); });
     try {
-      const res = await fetch('http://localhost:3000/api/auth/signup', { method: 'POST', body: data });
+      const res = await fetch('http://localhost:3000/api/auth/signup', {
+        method: 'POST',
+        body: data,
+        credentials: 'include', // keep session cookie returned by backend
+      });
       const result = await res.json();
       if (res.ok) {
-        toast.success('Account created! Awaiting verification.');
-        navigate('/login');
+        toast.success('Account created successfully. Redirecting…');
+        navigate(getDashboardPath(result.role));
       } else {
         toast.error(result.message || 'Signup failed');
       }

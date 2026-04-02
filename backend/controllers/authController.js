@@ -120,3 +120,39 @@ exports.me = (req, res) => {
 
   return res.status(401).json({ message: "Not authenticated" });
 };
+
+exports.getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find().select("-password").sort({ createdAt: -1 });
+    return res.status(200).json(users);
+  } catch (err) {
+    console.error("getAllUsers error", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+exports.updateUserStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    
+    if (!["verified", "unverified", "rejected"].includes(status)) {
+      return res.status(400).json({ message: "Invalid status" });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true }
+    ).select("-password");
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json({ message: "User status updated", user: updatedUser });
+  } catch (err) {
+    console.error("updateUserStatus error", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};

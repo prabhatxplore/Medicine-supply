@@ -20,6 +20,7 @@ const CheckoutPage = () => {
   const [searchLoading, setSearchLoading] = useState(false);
   const [saveForLater, setSaveForLater] = useState(false);
   const [addressLabel, setAddressLabel] = useState('Home');
+  const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -36,6 +37,18 @@ const CheckoutPage = () => {
         }
       } catch {
         /* not logged in or network */
+      }
+    })();
+
+    (async () => {
+      try {
+        const res = await fetch(`${API}/api/auth/me`, { credentials: 'include' });
+        if (res.ok) {
+          const data = await res.json();
+          setUser(data);
+        }
+      } catch {
+        /* ignore */
       }
     })();
   }, []);
@@ -153,7 +166,9 @@ const CheckoutPage = () => {
   const grandTotal = total + delivery;
   const requiresPrescription = cart.some(i => i.requiresPrescription);
   const hasAddress = deliveryAddress && Number.isFinite(deliveryAddress.lat) && Number.isFinite(deliveryAddress.lng);
-  const canSubmit = !loading && cart.length > 0 && hasAddress && (!requiresPrescription || prescription);
+  
+  const isVerified = user && user.status === 'verified';
+  const canSubmit = !loading && cart.length > 0 && hasAddress && (!requiresPrescription || prescription) && isVerified;
 
   return (
     <div style={{ background: 'transparent', fontFamily: "'Inter', sans-serif" }}>
@@ -365,6 +380,16 @@ const CheckoutPage = () => {
                     </span>
                   ) : '🎉 Place Order'}
                 </button>
+                {user && user.status !== 'verified' && (
+                  <div style={{ marginTop: 8, padding: '10px 14px', background: '#fef2f2', borderRadius: 8, border: '1px solid #fca5a5' }}>
+                    <p style={{ fontSize: '0.875rem', color: '#b91c1c', margin: 0, fontWeight: 600 }}>
+                      ⚠️ Account Not Verified
+                    </p>
+                    <p style={{ fontSize: '0.8125rem', color: '#dc2626', margin: '4px 0 0' }}>
+                      You cannot place orders until an admin verifies your uploaded documents. Please wait for approval.
+                    </p>
+                  </div>
+                )}
                 {!hasAddress && (
                   <p style={{ fontSize: '0.8125rem', color: '#ef4444', textAlign: 'center', margin: '0 0 4px' }}>
                     Choose a delivery address on the map or from saved addresses

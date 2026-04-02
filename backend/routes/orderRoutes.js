@@ -2,10 +2,23 @@ const express = require("express");
 const multer = require("multer");
 const orderController = require("../controllers/orderController");
 
+const path = require("path");
+
 const router = express.Router();
 
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/");
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const ext = path.extname(file.originalname) || '';
+    cb(null, file.fieldname + '-' + uniqueSuffix + ext);
+  }
+});
+
 const upload = multer({
-  dest: "uploads/",
+  storage: storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
   fileFilter: (req, file, cb) => {
     // Allow images and PDFs for prescriptions

@@ -41,13 +41,15 @@ const Signup = () => {
       const response = await fetch('http://localhost:3000/api/auth/signup', {
         method: 'POST',
         body: data,
+        credentials: 'include',
       });
 
       const result = await response.json();
 
       if (response.ok) {
-        toast.success('Signup successful! Please wait for verification.');
-        navigate('/login');
+        // Backend sets session on signup, so redirect user immediately.
+        toast.success('Signup successful! Redirecting…');
+        navigate('/');
       } else {
         toast.error(result.message || 'Signup failed');
       }

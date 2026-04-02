@@ -19,6 +19,7 @@ import ProductsPage from './pages/ProductsPage';
 import PublicLayout from './layouts/PublicLayout';
 import MyPrescriptionsPage from './pages/MyPrescriptionsPage';
 import AdminPrescriptionsPage from './pages/AdminPrescriptionsPage';
+import AdminUsersPage from './pages/AdminUsersPage';
 
 function App() {
   return (
@@ -64,6 +65,7 @@ function App() {
           <Route path="/admin/medicines" element={<AdminMedicinesPage />} />
           <Route path="/admin/orders" element={<AdminOrdersPage />} />
           <Route path="/admin/prescriptions" element={<AdminPrescriptionsPage />} />
+          <Route path="/admin/users" element={<AdminUsersPage />} />
 
           {/* Volunteer Routes */}
           <Route path="/volunteer/login" element={<VolunteerLoginPage />} />
