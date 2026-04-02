@@ -13,7 +13,7 @@ const AdminOrders = () => {
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:3000/api/orders/admin/all', {
+      const response = await fetch('https://medicine-supply.onrender.com/api/orders/admin/all', {
         credentials: 'include',
       });
       const data = await response.json();
@@ -27,7 +27,7 @@ const AdminOrders = () => {
 
   const updateStatus = async (orderId, newStatus) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/orders/${orderId}/status`, {
+      const response = await fetch(`https://medicine-supply.onrender.com/api/orders/${orderId}/status`, {
         method: 'PUT',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },

@@ -22,9 +22,9 @@ const AdminDashboardPage = () => {
     (async () => {
       try {
         const [medRes, ordRes, rxRes] = await Promise.all([
-          fetch('http://localhost:3000/api/medicines'),
-          fetch('http://localhost:3000/api/orders/admin/all', { credentials: 'include' }),
-          fetch('http://localhost:3000/api/prescriptions/admin/stats', { credentials: 'include' }),
+          fetch('https://medicine-supply.onrender.com/api/medicines'),
+          fetch('https://medicine-supply.onrender.com/api/orders/admin/all', { credentials: 'include' }),
+          fetch('https://medicine-supply.onrender.com/api/prescriptions/admin/stats', { credentials: 'include' }),
         ]);
         const [meds, orders, rx] = await Promise.all([medRes.json(), ordRes.json(), rxRes.json().catch(() => ({}))]);
         setStats({

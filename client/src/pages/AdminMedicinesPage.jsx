@@ -29,7 +29,7 @@ const AdminMedicinesPage = () => {
 
   const fetchMedicines = async () => {
     setLoading(true);
-    try { setMedicines(await (await fetch('http://localhost:3000/api/medicines')).json()); }
+    try { setMedicines(await (await fetch('https://medicine-supply.onrender.com/api/medicines')).json()); }
     catch { toast.error('Failed to load medicines'); }
     finally { setLoading(false); }
   };
@@ -76,7 +76,7 @@ const AdminMedicinesPage = () => {
       categories: Array.isArray(med.categories) ? [...med.categories] : [],
     });
     setImage(null);
-    setImagePreview(med.image ? (med.image.startsWith('http') ? med.image : `http://localhost:3000/${med.image}`) : null);
+    setImagePreview(med.image ? (med.image.startsWith('http') ? med.image : `https://medicine-supply.onrender.com/${med.image}`) : null);
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -91,8 +91,8 @@ const AdminMedicinesPage = () => {
     setSubmitting(true);
     const data = buildMedicineFormData();
     const url = editingId
-      ? `http://localhost:3000/api/medicines/${editingId}`
-      : 'http://localhost:3000/api/medicines';
+      ? `https://medicine-supply.onrender.com/api/medicines/${editingId}`
+      : 'https://medicine-supply.onrender.com/api/medicines';
     const method = editingId ? 'PUT' : 'POST';
     try {
       const res = await fetch(url, { method, body: data, credentials: 'include' });
@@ -114,7 +114,7 @@ const AdminMedicinesPage = () => {
   const handleDelete = async (id, name) => {
     if (!window.confirm(`Delete "${name}"? This cannot be undone.`)) return;
     try {
-      const res = await fetch(`http://localhost:3000/api/medicines/${id}`, { method: 'DELETE', credentials: 'include' });
+      const res = await fetch(`https://medicine-supply.onrender.com/api/medicines/${id}`, { method: 'DELETE', credentials: 'include' });
       if (res.ok) {
         setMedicines((prev) => prev.filter((m) => m._id !== id));
         if (String(editingId) === String(id)) resetForm();
@@ -291,7 +291,7 @@ const AdminMedicinesPage = () => {
               <div key={med._id} className="card card-lift" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                 <div style={{ height: 150, background: 'linear-gradient(135deg,#ecfdf5,#f0fdfa)', position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
                   {med.image ? (
-                    <img src={med.image.startsWith('http') ? med.image : `http://localhost:3000/${med.image}`} alt={med.name} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .35s' }}
+                    <img src={med.image.startsWith('http') ? med.image : `https://medicine-supply.onrender.com/${med.image}`} alt={med.name} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .35s' }}
                       onMouseEnter={e => e.target.style.transform = 'scale(1.07)'}
                       onMouseLeave={e => e.target.style.transform = 'scale(1)'} />
                   ) : (

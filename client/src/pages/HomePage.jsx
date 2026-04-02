@@ -49,7 +49,7 @@ const HomePage = () => {
       shouldFetchMe.current = false;
       setLoading(true);
       try {
-        const res = await fetch("http://localhost:3000/api/auth/me", { credentials: "include" });
+        const res = await fetch("https://medicine-supply.onrender.com/api/auth/me", { credentials: "include" });
         if (res.ok) {
           const data = await res.json();
           setUser(data);
@@ -79,7 +79,7 @@ const HomePage = () => {
     try {
       const params = new URLSearchParams();
       if (cat !== "All") params.append("category", cat);
-      const url = `http://localhost:3000/api/medicines${params.toString() ? `?${params}` : ""}`;
+      const url = `https://medicine-supply.onrender.com/api/medicines${params.toString() ? `?${params}` : ""}`;
       const res = await fetch(url);
       const data = await res.json();
       setMedicines(data.slice(0, 6));

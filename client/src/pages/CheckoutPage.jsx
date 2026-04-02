@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import { notifyCartUpdated } from '../utils/cartNotify';
 import AddressMapPicker from '../components/AddressMapPicker.jsx';
 
-const API = 'http://localhost:3000';
+const API = 'https://medicine-supply.onrender.com';
 const STEPS = ['Cart', 'Checkout', 'Confirmed'];
 
 const CheckoutPage = () => {

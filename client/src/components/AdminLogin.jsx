@@ -21,7 +21,7 @@ const AdminLogin = () => {
     // For demo, we'll use regular login but check for admin credentials
     // In production, you'd have an admin table and role-based access
     try {
-      const response = await fetch('http://localhost:3000/api/auth/login', {
+      const response = await fetch('https://medicine-supply.onrender.com/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

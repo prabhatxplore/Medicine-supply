@@ -11,7 +11,7 @@ const Home = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await fetch('http://localhost:3000/api/auth/me', {
+        const response = await fetch('https://medicine-supply.onrender.com/api/auth/me', {
           credentials: 'include',
         });
         if (response.ok) {
@@ -29,7 +29,7 @@ const Home = () => {
 
   const handleLogout = async () => {
     try {
-      await fetch('http://localhost:3000/api/auth/logout', {
+      await fetch('https://medicine-supply.onrender.com/api/auth/logout', {
         method: 'POST',
         credentials: 'include',
       });

@@ -13,7 +13,7 @@ const VolunteerLoginPage = () => {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch('http://localhost:3000/api/auth/me', { credentials: 'include' });
+        const res = await fetch('https://medicine-supply.onrender.com/api/auth/me', { credentials: 'include' });
         if (!res.ok) return;
         const user = await res.json();
         if (user.role === 'admin') navigate('/admin');
@@ -29,7 +29,7 @@ const VolunteerLoginPage = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:3000/api/auth/login", {
+      const res = await fetch("https://medicine-supply.onrender.com/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

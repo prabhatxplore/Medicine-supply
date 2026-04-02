@@ -110,9 +110,9 @@ const VolunteerDashboardPage = () => {
     setLoading(true);
     try {
       const [meRes, availableRes, mineRes] = await Promise.all([
-        fetch("http://localhost:3000/api/auth/me", { credentials: "include" }),
-        fetch("http://localhost:3000/api/orders/volunteer/available", { credentials: "include" }),
-        fetch("http://localhost:3000/api/orders/volunteer/mine", { credentials: "include" }),
+        fetch("https://medicine-supply.onrender.com/api/auth/me", { credentials: "include" }),
+        fetch("https://medicine-supply.onrender.com/api/orders/volunteer/available", { credentials: "include" }),
+        fetch("https://medicine-supply.onrender.com/api/orders/volunteer/mine", { credentials: "include" }),
       ]);
 
       if (!meRes.ok) {
@@ -143,7 +143,7 @@ const VolunteerDashboardPage = () => {
 
   const handleLogout = async () => {
     try {
-      await fetch("http://localhost:3000/api/auth/logout", { method: "POST", credentials: "include" });
+      await fetch("https://medicine-supply.onrender.com/api/auth/logout", { method: "POST", credentials: "include" });
       toast.success("Logged out");
       navigate("/");
     } catch {
@@ -153,7 +153,7 @@ const VolunteerDashboardPage = () => {
 
   const claimOrder = async (orderId) => {
     try {
-      const res = await fetch(`http://localhost:3000/api/orders/${orderId}/claim`, {
+      const res = await fetch(`https://medicine-supply.onrender.com/api/orders/${orderId}/claim`, {
         method: "POST",
         credentials: "include",
       });
@@ -171,7 +171,7 @@ const VolunteerDashboardPage = () => {
 
   const pickOrder = async (orderId) => {
     try {
-      const res = await fetch(`http://localhost:3000/api/orders/${orderId}/pick`, {
+      const res = await fetch(`https://medicine-supply.onrender.com/api/orders/${orderId}/pick`, {
         method: "PUT",
         credentials: "include",
       });
@@ -189,7 +189,7 @@ const VolunteerDashboardPage = () => {
 
   const deliverOrder = async (orderId) => {
     try {
-      const res = await fetch(`http://localhost:3000/api/orders/${orderId}/deliver`, {
+      const res = await fetch(`https://medicine-supply.onrender.com/api/orders/${orderId}/deliver`, {
         method: "PUT",
         credentials: "include",
       });

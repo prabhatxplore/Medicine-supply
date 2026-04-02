@@ -35,7 +35,7 @@ const AdminPrescriptionsPage = () => {
 
   const loadOrdersCount = useCallback(async () => {
     try {
-      const res = await fetch('http://localhost:3000/api/orders/admin/all', { credentials: 'include' });
+      const res = await fetch('https://medicine-supply.onrender.com/api/orders/admin/all', { credentials: 'include' });
       if (res.ok) {
         const orders = await res.json();
         setPendingOrders(orders.filter((o) => o.status === 'Pending').length);
@@ -49,7 +49,7 @@ const AdminPrescriptionsPage = () => {
     setLoading(true);
     try {
       const q = filter ? `?status=${encodeURIComponent(filter)}` : '';
-      const res = await fetch(`http://localhost:3000/api/prescriptions/admin/list${q}`, { credentials: 'include' });
+      const res = await fetch(`https://medicine-supply.onrender.com/api/prescriptions/admin/list${q}`, { credentials: 'include' });
       if (!res.ok) throw new Error();
       const data = await res.json();
       setList(data);
@@ -88,7 +88,7 @@ const AdminPrescriptionsPage = () => {
   const patch = async (path, body) => {
     setBusy(true);
     try {
-      const res = await fetch(`http://localhost:3000/api/prescriptions/${selected._id}${path}`, {
+      const res = await fetch(`https://medicine-supply.onrender.com/api/prescriptions/${selected._id}${path}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -110,7 +110,7 @@ const AdminPrescriptionsPage = () => {
   };
 
   const fileUrl = selected?.prescriptionFile 
-    ? (selected.prescriptionFile.startsWith('http') ? selected.prescriptionFile : `http://localhost:3000/${selected.prescriptionFile}`)
+    ? (selected.prescriptionFile.startsWith('http') ? selected.prescriptionFile : `https://medicine-supply.onrender.com/${selected.prescriptionFile}`)
     : null;
   const isPdf = fileUrl && selected.prescriptionFile.toLowerCase().endsWith('.pdf');
 

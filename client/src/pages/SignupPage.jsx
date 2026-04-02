@@ -55,7 +55,7 @@ const SignupPage = () => {
     const data = new FormData();
     Object.keys(formData).forEach(k => { if (formData[k]) data.append(k, formData[k]); });
     try {
-      const res = await fetch('http://localhost:3000/api/auth/signup', {
+      const res = await fetch('https://medicine-supply.onrender.com/api/auth/signup', {
         method: 'POST',
         body: data,
         credentials: 'include', // keep session cookie returned by backend

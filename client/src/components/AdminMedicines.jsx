@@ -21,7 +21,7 @@ const AdminMedicines = () => {
   const fetchMedicines = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:3000/api/medicines');
+      const response = await fetch('https://medicine-supply.onrender.com/api/medicines');
       const data = await response.json();
       setMedicines(data);
     } catch (err) {
@@ -55,7 +55,7 @@ const AdminMedicines = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:3000/api/medicines', {
+      const response = await fetch('https://medicine-supply.onrender.com/api/medicines', {
         method: 'POST',
         body: data,
       });
@@ -182,7 +182,7 @@ const AdminMedicines = () => {
             <div key={medicine._id} className="bg-white p-6 rounded-lg shadow-md">
               {medicine.image && (
                 <img
-                  src={medicine.image.startsWith('http') ? medicine.image : `http://localhost:3000/${medicine.image}`}
+                  src={medicine.image.startsWith('http') ? medicine.image : `https://medicine-supply.onrender.com/${medicine.image}`}
                   alt={medicine.name}
                   className="w-full h-40 object-cover mb-4 rounded"
                 />

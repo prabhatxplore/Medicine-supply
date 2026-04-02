@@ -14,7 +14,7 @@ const MedicineDetail = () => {
   const fetchMedicine = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:3000/api/medicines/${id}`);
+      const response = await fetch(`https://medicine-supply.onrender.com/api/medicines/${id}`);
       const data = await response.json();
       setMedicine(data);
     } catch (err) {
@@ -44,7 +44,7 @@ const MedicineDetail = () => {
       <div className="bg-white p-6 rounded-lg shadow-md">
         {medicine.image && (
           <img
-            src={medicine.image.startsWith('http') ? medicine.image : `http://localhost:3000/${medicine.image}`}
+            src={medicine.image.startsWith('http') ? medicine.image : `https://medicine-supply.onrender.com/${medicine.image}`}
             alt={medicine.name}
             className="w-full h-64 object-cover mb-6 rounded"
           />

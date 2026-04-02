@@ -16,10 +16,10 @@ const AdminDashboard = () => {
 
   const fetchStats = async () => {
     try {
-      const medicinesRes = await fetch('http://localhost:3000/api/medicines');
+      const medicinesRes = await fetch('https://medicine-supply.onrender.com/api/medicines');
       const medicines = await medicinesRes.json();
 
-      const ordersRes = await fetch('http://localhost:3000/api/orders/admin/all', {
+      const ordersRes = await fetch('https://medicine-supply.onrender.com/api/orders/admin/all', {
         credentials: 'include',
       });
       const orders = await ordersRes.json();

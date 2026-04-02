@@ -20,7 +20,7 @@ const MyPrescriptionsPage = () => {
   const fetchMine = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:3000/api/prescriptions/my', { credentials: 'include' });
+      const res = await fetch('https://medicine-supply.onrender.com/api/prescriptions/my', { credentials: 'include' });
       if (res.status === 401 || res.status === 403) {
         setUnauthorized(true);
         setList([]);
@@ -65,7 +65,7 @@ const MyPrescriptionsPage = () => {
       const fd = new FormData();
       fd.append('prescription', file);
       fd.append('patientNote', patientNote);
-      const res = await fetch('http://localhost:3000/api/prescriptions', {
+      const res = await fetch('https://medicine-supply.onrender.com/api/prescriptions', {
         method: 'POST',
         body: fd,
         credentials: 'include',
@@ -178,7 +178,7 @@ const MyPrescriptionsPage = () => {
                 ) : null}
                 {r.prescriptionFile ? (
                   <a
-                    href={r.prescriptionFile.startsWith('http') ? r.prescriptionFile : `http://localhost:3000/${r.prescriptionFile}`}
+                    href={r.prescriptionFile.startsWith('http') ? r.prescriptionFile : `https://medicine-supply.onrender.com/${r.prescriptionFile}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-sm font-semibold text-emerald-700 hover:underline"

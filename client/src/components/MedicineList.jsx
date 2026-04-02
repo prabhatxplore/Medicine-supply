@@ -48,7 +48,7 @@ const MedicineList = () => {
       if (debouncedSearch) params.append('search', debouncedSearch);
       if (category !== 'All') params.append('category', category);
       const response = await fetch(
-        `http://localhost:3000/api/medicines${params.toString() ? `?${params}` : ''}`
+        `https://medicine-supply.onrender.com/api/medicines${params.toString() ? `?${params}` : ''}`
       );
       if (!response.ok) throw new Error('Failed to fetch');
       const data = await response.json();
@@ -68,7 +68,7 @@ const MedicineList = () => {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch('http://localhost:3000/api/auth/me', { credentials: 'include' });
+        const res = await fetch('https://medicine-supply.onrender.com/api/auth/me', { credentials: 'include' });
         setIsAuthenticated(res.ok);
       } catch {
         setIsAuthenticated(false);

@@ -24,7 +24,7 @@ const MedicineProductCard = ({ medicine: med, onAddToCart, addDisabled, animatio
       >
         {med.image ? (
           <img
-            src={med.image.startsWith('http') ? med.image : `http://localhost:3000/${med.image}`}
+            src={med.image.startsWith('http') ? med.image : `https://medicine-supply.onrender.com/${med.image}`}
             alt={med.name}
             className="h-full w-full object-cover transition duration-300 ease-out group-hover:scale-[1.03]"
             loading="lazy"

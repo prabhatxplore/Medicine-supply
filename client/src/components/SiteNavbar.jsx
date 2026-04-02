@@ -39,7 +39,7 @@ const SiteNavbar = () => {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch('http://localhost:3000/api/auth/me', { credentials: 'include' });
+        const res = await fetch('https://medicine-supply.onrender.com/api/auth/me', { credentials: 'include' });
         if (res.ok) setUser(await res.json());
         else setUser(null);
       } catch {
@@ -65,7 +65,7 @@ const SiteNavbar = () => {
 
   const handleLogout = async () => {
     try {
-      await fetch('http://localhost:3000/api/auth/logout', { method: 'POST', credentials: 'include' });
+      await fetch('https://medicine-supply.onrender.com/api/auth/logout', { method: 'POST', credentials: 'include' });
       toast.success('Logged out');
       setUser(null);
       setMobileMenuOpen(false);

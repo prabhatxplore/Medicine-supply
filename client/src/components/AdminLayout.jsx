@@ -38,7 +38,7 @@ const AdminLayout = ({ active, pageTitle, pageSubtitle, pendingOrders = 0, child
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch('http://localhost:3000/api/prescriptions/admin/stats', { credentials: 'include' });
+        const res = await fetch('https://medicine-supply.onrender.com/api/prescriptions/admin/stats', { credentials: 'include' });
         if (res.ok) {
           const d = await res.json();
           setPendingRx(d.pending ?? 0);
@@ -51,7 +51,7 @@ const AdminLayout = ({ active, pageTitle, pageSubtitle, pendingOrders = 0, child
 
   const logout = async () => {
     try {
-      await fetch('http://localhost:3000/api/auth/logout', { method: 'POST', credentials: 'include' });
+      await fetch('https://medicine-supply.onrender.com/api/auth/logout', { method: 'POST', credentials: 'include' });
       toast.success('Logged out');
       navigate('/');
     } catch { toast.error('Logout failed'); }

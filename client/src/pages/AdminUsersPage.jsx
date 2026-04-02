@@ -9,7 +9,7 @@ const AdminUsersPage = () => {
 
   const fetchUsers = async () => {
     try {
-      const res = await fetch('http://localhost:3000/api/auth/admin/users', { credentials: 'include' });
+      const res = await fetch('https://medicine-supply.onrender.com/api/auth/admin/users', { credentials: 'include' });
       if (res.ok) {
         const data = await res.json();
         const nonAdmins = data.filter(u => u.role === 'user');
@@ -30,7 +30,7 @@ const AdminUsersPage = () => {
 
   const handleUpdateStatus = async (userId, newStatus) => {
     try {
-      const res = await fetch(`http://localhost:3000/api/auth/admin/users/${userId}/status`, {
+      const res = await fetch(`https://medicine-supply.onrender.com/api/auth/admin/users/${userId}/status`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus }),
@@ -108,12 +108,12 @@ const AdminUsersPage = () => {
                         {u.nationalIdCard || u.citizenshipCard ? (
                           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                             {u.nationalIdCard && (
-                              <a href={u.nationalIdCard.startsWith('http') ? u.nationalIdCard : `http://localhost:3000/${u.nationalIdCard}`} target="_blank" rel="noreferrer" style={{ fontSize: '0.8125rem', color: '#3b82f6', textDecoration: 'none', fontWeight: 600 }}>
+                              <a href={u.nationalIdCard.startsWith('http') ? u.nationalIdCard : `https://medicine-supply.onrender.com/${u.nationalIdCard}`} target="_blank" rel="noreferrer" style={{ fontSize: '0.8125rem', color: '#3b82f6', textDecoration: 'none', fontWeight: 600 }}>
                                 📄 View National ID
                               </a>
                             )}
                             {u.citizenshipCard && (
-                              <a href={u.citizenshipCard.startsWith('http') ? u.citizenshipCard : `http://localhost:3000/${u.citizenshipCard}`} target="_blank" rel="noreferrer" style={{ fontSize: '0.8125rem', color: '#3b82f6', textDecoration: 'none', fontWeight: 600 }}>
+                              <a href={u.citizenshipCard.startsWith('http') ? u.citizenshipCard : `https://medicine-supply.onrender.com/${u.citizenshipCard}`} target="_blank" rel="noreferrer" style={{ fontSize: '0.8125rem', color: '#3b82f6', textDecoration: 'none', fontWeight: 600 }}>
                                 📄 View Citizenship
                               </a>
                             )}

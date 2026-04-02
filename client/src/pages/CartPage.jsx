@@ -64,7 +64,7 @@ const CartPage = () => {
                     {/* Image */}
                     <div style={{ width: 68, height: 68, borderRadius: 10, background: '#f8fafc', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
                       {item.image ? (
-                        <img src={item.image.startsWith('http') ? item.image : `http://localhost:3000/${item.image}`} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <img src={item.image.startsWith('http') ? item.image : `https://medicine-supply.onrender.com/${item.image}`} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       ) : (
                         <span style={{ fontSize: 36 }}>💊</span>
                       )}

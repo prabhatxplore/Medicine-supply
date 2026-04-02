@@ -55,7 +55,7 @@ const OrdersPage = () => {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch('http://localhost:3000/api/orders', { credentials: 'include' });
+        const res = await fetch('https://medicine-supply.onrender.com/api/orders', { credentials: 'include' });
         const data = await res.json();
         setOrders(data);
       } catch {
@@ -177,7 +177,7 @@ const OrdersPage = () => {
                       </div>
                       {order.prescription && (
                         <button
-                          onClick={() => window.open(order.prescription.startsWith('http') ? order.prescription : `http://localhost:3000/${order.prescription}`, '_blank')}
+                          onClick={() => window.open(order.prescription.startsWith('http') ? order.prescription : `https://medicine-supply.onrender.com/${order.prescription}`, '_blank')}
                           className="btn"
                           style={{
                             flex: 1,
